@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getPracticeBySlug, MOCK_PRACTICES } from '../../lib/mock-practice-data';
 import { getRegionByCode } from '../../lib/body-region-constants';
+import { getPublishedPracticeBySlug, getPublishedPractices } from '@/server/queries/practices';
 
 // 辅助函数：将秒数格式化为 mm:ss
 function formatDuration(sec: number): string {
@@ -15,12 +15,13 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  return MOCK_PRACTICES.map(p => ({ slug: p.slug }));
+  const practices = await getPublishedPractices();
+  return practices.map((practice) => ({ slug: practice.slug }));
 }
 
 export default async function PracticeDetailPage({ params }: Props) {
   const { slug } = await params;
-  const practice = getPracticeBySlug(slug);
+  const practice = await getPublishedPracticeBySlug(slug);
 
   if (!practice) {
     notFound();
@@ -105,7 +106,7 @@ export default async function PracticeDetailPage({ params }: Props) {
       {/* 做反馈按钮 */}
       <div className="mt-10 pt-6 border-t border-stone-200">
         <Link
-          href={`/feedback/new?practiceId=${practice.id}&practiceTitle=${encodeURIComponent(practice.title)}`}
+          href={`/feedback/new?practiceId=${practice.id}`}
           className="block w-full text-center px-6 py-4 bg-stone-900 text-white text-base font-medium rounded-xl hover:bg-stone-700 transition-colors"
         >
           做这个练习的反馈

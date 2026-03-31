@@ -1,8 +1,6 @@
-import type { BodyRegionCode } from './body-region-types';
+import type { BodyRegionCode } from '@/types/body-region';
 
-// 练习对象类型
-export type Practice = {
-  id: string;
+export type PracticeSeed = {
   title: string;
   slug: string;
   courseName?: string;
@@ -13,11 +11,8 @@ export type Practice = {
   bodyRegionCodes: BodyRegionCode[];
 };
 
-// 练习数据
-// 音频文件放在 public/audio/ 目录下，Next.js 直接通过 /audio/xxx 访问
-export const MOCK_PRACTICES: Practice[] = [
+export const PRACTICE_SEED: PracticeSeed[] = [
   {
-    id: '1',
     title: '感知身体的对角线',
     slug: 'perceive-body-diagonal',
     courseName: 'ATM - 感知系列',
@@ -31,10 +26,18 @@ export const MOCK_PRACTICES: Practice[] = [
 7. 重复 3-5 次，体会左右两侧的差异。`,
     audioUrl: '/audio/感知身体的对角线.mp3',
     durationSec: 300,
-    bodyRegionCodes: ['front_left_foot', 'front_right_foot', 'front_left_thigh', 'front_right_thigh', 'front_pelvis', 'back_pelvis', 'front_left_shoulder', 'front_right_shoulder'],
+    bodyRegionCodes: [
+      'front_left_foot',
+      'front_right_foot',
+      'front_left_thigh',
+      'front_right_thigh',
+      'front_pelvis',
+      'back_pelvis',
+      'front_left_shoulder',
+      'front_right_shoulder',
+    ],
   },
   {
-    id: '2',
     title: '柔软的手臂',
     slug: 'soft-arm',
     courseName: 'ATM - 肩颈专项',
@@ -49,10 +52,16 @@ export const MOCK_PRACTICES: Practice[] = [
 8. 双臂同时做，感知整体肩颈的连接感。`,
     audioUrl: '/audio/柔软的手臂.mp3',
     durationSec: 360,
-    bodyRegionCodes: ['front_left_shoulder', 'front_right_shoulder', 'back_left_shoulder', 'back_right_shoulder', 'front_neck', 'front_chest'],
+    bodyRegionCodes: [
+      'front_left_shoulder',
+      'front_right_shoulder',
+      'back_left_shoulder',
+      'back_right_shoulder',
+      'front_neck',
+      'front_chest',
+    ],
   },
   {
-    id: '3',
     title: '迷你 ATM 脊柱链条',
     slug: 'mini-atm-spine-chain',
     courseName: 'ATM - 脊柱专项',
@@ -66,10 +75,17 @@ export const MOCK_PRACTICES: Practice[] = [
 7. 重复左侧。全程保持呼吸平稳。`,
     audioUrl: '/audio/迷你ATM脊柱链条.aac',
     durationSec: 420,
-    bodyRegionCodes: ['back_lower_back', 'back_upper_back', 'front_neck', 'back_neck', 'back_left_shoulder', 'back_right_shoulder', 'back_pelvis'],
+    bodyRegionCodes: [
+      'back_lower_back',
+      'back_upper_back',
+      'front_neck',
+      'back_neck',
+      'back_left_shoulder',
+      'back_right_shoulder',
+      'back_pelvis',
+    ],
   },
   {
-    id: '4',
     title: '好的姿势',
     slug: 'good-posture',
     courseName: 'ATM - 站立系列',
@@ -84,10 +100,16 @@ export const MOCK_PRACTICES: Practice[] = [
 8. 找到骨骼支撑、肌肉松弛的感觉，这就是"好的姿势"。`,
     audioUrl: '/audio/ATM—好的姿势.aac',
     durationSec: 330,
-    bodyRegionCodes: ['front_pelvis', 'back_lower_back', 'front_abdomen', 'front_left_shoulder', 'front_right_shoulder', 'front_neck'],
+    bodyRegionCodes: [
+      'front_pelvis',
+      'back_lower_back',
+      'front_abdomen',
+      'front_left_shoulder',
+      'front_right_shoulder',
+      'front_neck',
+    ],
   },
   {
-    id: '5',
     title: '颈部自由旋转',
     slug: 'neck-free-rotation',
     courseName: 'ATM - 地面动作',
@@ -98,12 +120,15 @@ export const MOCK_PRACTICES: Practice[] = [
 4. 让头部重量自然引导转动，不主动用力。
 5. 每次转动后稍作停留，感受颈部与地面的接触。
 6. 重复 5-10 次，慢慢观察两侧感受的变化。`,
-    audioUrl: undefined,
     durationSec: 240,
-    bodyRegionCodes: ['front_neck', 'front_head', 'front_left_shoulder', 'front_right_shoulder'],
+    bodyRegionCodes: [
+      'front_neck',
+      'front_head',
+      'front_left_shoulder',
+      'front_right_shoulder',
+    ],
   },
   {
-    id: '6',
     title: '髋部旋转觉察',
     slug: 'hip-rotation-awareness',
     courseName: 'ATM - 地面动作',
@@ -114,12 +139,15 @@ export const MOCK_PRACTICES: Practice[] = [
 4. 轻轻将双腿向胸部方向拉近，感受右髋的伸展。
 5. 两侧交换，感知左右髋部灵活性是否相同。
 6. 每侧保持 1-2 分钟，呼吸保持平稳。`,
-    audioUrl: undefined,
     durationSec: 360,
-    bodyRegionCodes: ['front_pelvis', 'front_left_thigh', 'front_right_thigh', 'back_pelvis'],
+    bodyRegionCodes: [
+      'front_pelvis',
+      'front_left_thigh',
+      'front_right_thigh',
+      'back_pelvis',
+    ],
   },
   {
-    id: '7',
     title: '脚部重量感知',
     slug: 'foot-weight-awareness',
     courseName: 'ATM - 站立系列',
@@ -131,23 +159,14 @@ export const MOCK_PRACTICES: Practice[] = [
 5. 尝试将重心移向左侧，再移向右侧。
 6. 观察站立时左右脚用力是否均匀。
 7. 最后找到双脚均匀受力的感觉，保持片刻。`,
-    audioUrl: undefined,
     durationSec: 270,
-    bodyRegionCodes: ['front_left_foot', 'front_right_foot', 'front_left_lower_leg', 'front_right_lower_leg', 'back_left_foot', 'back_right_foot'],
+    bodyRegionCodes: [
+      'front_left_foot',
+      'front_right_foot',
+      'front_left_lower_leg',
+      'front_right_lower_leg',
+      'back_left_foot',
+      'back_right_foot',
+    ],
   },
 ];
-
-// 根据身体区域 code 查找关联练习
-export function getPracticesByRegion(code: BodyRegionCode): Practice[] {
-  return MOCK_PRACTICES.filter(p => p.bodyRegionCodes.includes(code));
-}
-
-// 根据 slug 查找练习
-export function getPracticeBySlug(slug: string): Practice | undefined {
-  return MOCK_PRACTICES.find(p => p.slug === slug);
-}
-
-// 根据 id 查找练习
-export function getPracticeById(id: string): Practice | undefined {
-  return MOCK_PRACTICES.find(p => p.id === id);
-}

@@ -1,4 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { UserRole } from "@prisma/client";
+import SignOutButton from "@/components/auth/SignOutButton";
+import { hasPublicSupabaseEnv } from "@/lib/env/public";
+import { getOptionalAuthContext } from "@/server/auth/get-optional-user";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -6,28 +11,54 @@ export const metadata: Metadata = {
   description: "身体觉察记录与练习检索",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const auth = hasPublicSupabaseEnv() ? await getOptionalAuthContext() : null;
+  const userLabel =
+    auth?.profile?.fullName ?? auth?.user.email ?? null;
+  const showTeacherNav = auth?.profile?.role === UserRole.TEACHER;
+  const teacherNavLabel = showTeacherNav ? '老师端' : '老师入口';
+
   return (
     <html lang="zh-CN">
       <body className="min-h-screen flex flex-col bg-stone-50 text-stone-800">
         {/* 顶部导航 */}
         <header className="bg-white border-b border-stone-200 px-6 py-4">
-          <div className="max-w-3xl mx-auto flex items-center justify-between">
-            <a href="/" className="text-lg font-medium text-stone-900">
+          <div className="max-w-5xl mx-auto flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <Link href="/" className="text-lg font-medium text-stone-900">
               费登奎斯
-            </a>
-            <nav className="flex gap-4 text-sm text-stone-500">
-              <a href="/practice-search" className="hover:text-stone-800 transition-colors">
-                找练习
-              </a>
-              <a href="/feedback" className="hover:text-stone-800 transition-colors">
-                我的反馈
-              </a>
-            </nav>
+            </Link>
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
+              <nav className="flex flex-wrap gap-4 text-sm text-stone-500">
+                <Link href="/practice-search" className="hover:text-stone-800 transition-colors">
+                  找练习
+                </Link>
+                <Link href="/feedback" className="hover:text-stone-800 transition-colors">
+                  我的反馈
+                </Link>
+                <Link href="/teacher" className="hover:text-stone-800 transition-colors">
+                  {teacherNavLabel}
+                </Link>
+              </nav>
+
+              <div className="flex items-center gap-3 text-sm">
+                {userLabel ? (
+                  <>
+                    <span className="text-stone-500 truncate max-w-[14rem]">
+                      {userLabel}
+                    </span>
+                    <SignOutButton />
+                  </>
+                ) : (
+                  <Link href="/login" className="text-stone-500 hover:text-stone-900 transition-colors">
+                    登录
+                  </Link>
+                )}
+              </div>
+            </div>
           </div>
         </header>
 
