@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { UserRole } from "@prisma/client";
 import SignOutButton from "@/components/auth/SignOutButton";
+import { isInternalStudentEmail } from "@/lib/auth/student-account";
 import { hasPublicSupabaseEnv } from "@/lib/env/public";
 import { getOptionalAuthContext } from "@/server/auth/get-optional-user";
 import "./globals.css";
@@ -18,7 +19,10 @@ export default async function RootLayout({
 }>) {
   const auth = hasPublicSupabaseEnv() ? await getOptionalAuthContext() : null;
   const userLabel =
-    auth?.profile?.fullName ?? auth?.user.email ?? null;
+    auth?.profile?.fullName ??
+    auth?.profile?.studentId ??
+    (isInternalStudentEmail(auth?.user.email) ? null : auth?.user.email) ??
+    null;
   const showTeacherNav = auth?.profile?.role === UserRole.TEACHER;
   const teacherNavLabel = showTeacherNav ? '老师端' : '老师入口';
 

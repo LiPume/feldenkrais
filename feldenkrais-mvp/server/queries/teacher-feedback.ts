@@ -1,4 +1,5 @@
-import type { Prisma } from '@prisma/client';
+import { UserRole, type Prisma } from '@prisma/client';
+import { isInternalStudentEmail } from '@/lib/auth/student-account';
 import { formatDateOnly } from '@/lib/utils/date';
 import type { BodyRegionCode } from '@/types/body-region';
 import type {
@@ -65,7 +66,14 @@ export async function getTeacherDashboardData(
         },
       }
     : undefined;
-  const [totalFeedbackSessions, practiceGroups, bodyRegionGroups, labelGroups, studentGroups] =
+  const [
+    totalFeedbackSessions,
+    practiceGroups,
+    bodyRegionGroups,
+    labelGroups,
+    studentGroups,
+    studentProfiles,
+  ] =
     await Promise.all([
       prisma.feedbackSession.count({
         where: sessionWhere,
@@ -106,9 +114,20 @@ export async function getTeacherDashboardData(
           feedbackDate: true,
         },
       }),
+      prisma.userProfile.findMany({
+        where: {
+          role: UserRole.STUDENT,
+        },
+        select: {
+          id: true,
+          fullName: true,
+          studentId: true,
+          email: true,
+        },
+      }),
     ]);
 
-  const [practices, bodyRegions, labels, studentProfiles] = await Promise.all([
+  const [practices, bodyRegions, labels] = await Promise.all([
     practiceGroups.length > 0
       ? prisma.practice.findMany({
           where: {
@@ -152,20 +171,6 @@ export async function getTeacherDashboardData(
           },
         })
       : Promise.resolve([]),
-    studentGroups.length > 0
-      ? prisma.userProfile.findMany({
-          where: {
-            id: {
-              in: studentGroups.map((group) => group.studentProfileId),
-            },
-          },
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
-        })
-      : Promise.resolve([]),
   ]);
 
   const practiceMap = new Map(practices.map((practice) => [practice.id, practice.title]));
@@ -179,17 +184,47 @@ export async function getTeacherDashboardData(
     labels.map((label) => [label.id, { code: label.code, nameZh: label.nameZh }]),
   );
   const studentMap = new Map(
-    studentProfiles.map((profile) => [
-      profile.id,
+    studentGroups.map((group) => [
+      group.studentProfileId,
       {
-        name: profile.fullName ?? profile.email,
-        email: profile.email,
+        feedbackCount: group._count._all,
+        lastFeedbackDate: group._max.feedbackDate
+          ? formatDateOnly(group._max.feedbackDate)
+          : undefined,
       },
     ]),
   );
+  const studentSummaries = studentProfiles
+    .map((profile) => {
+      const studentGroup = studentMap.get(profile.id);
+
+      return {
+        studentProfileId: profile.id,
+        studentName: profile.fullName ?? profile.studentId ?? profile.email,
+        studentId: profile.studentId ?? undefined,
+        studentEmail: isInternalStudentEmail(profile.email) ? undefined : profile.email,
+        feedbackCount: studentGroup?.feedbackCount ?? 0,
+        hasSubmitted: (studentGroup?.feedbackCount ?? 0) > 0,
+        lastFeedbackDate: studentGroup?.lastFeedbackDate,
+      };
+    })
+    .sort((left, right) => {
+      const leftStudentId = left.studentId ?? '';
+      const rightStudentId = right.studentId ?? '';
+
+      if (leftStudentId !== rightStudentId) {
+        return leftStudentId.localeCompare(rightStudentId);
+      }
+
+      return left.studentName.localeCompare(right.studentName);
+    });
+  const submittedStudentCount = studentSummaries.filter((item) => item.hasSubmitted).length;
 
   return {
     totalFeedbackSessions,
+    registeredStudentCount: studentProfiles.length,
+    submittedStudentCount,
+    missingStudentCount: studentProfiles.length - submittedStudentCount,
     practiceStats: practiceGroups
       .map((group) => {
         if (!group.practiceId) {
@@ -236,32 +271,7 @@ export async function getTeacherDashboardData(
       })
       .filter((group) => group !== null)
       .sort((left, right) => right.count - left.count),
-    studentSummaries: studentGroups
-      .map((group) => {
-        const student = studentMap.get(group.studentProfileId);
-
-        if (!student) {
-          return null;
-        }
-
-        return {
-          studentProfileId: group.studentProfileId,
-          studentName: student.name,
-          studentEmail: student.email,
-          feedbackCount: group._count._all,
-          lastFeedbackDate: group._max.feedbackDate
-            ? formatDateOnly(group._max.feedbackDate)
-            : undefined,
-        };
-      })
-      .filter((group) => group !== null)
-      .sort((left, right) => {
-        if (right.feedbackCount !== left.feedbackCount) {
-          return right.feedbackCount - left.feedbackCount;
-        }
-
-        return (right.lastFeedbackDate ?? '').localeCompare(left.lastFeedbackDate ?? '');
-      }),
+    studentSummaries,
   };
 }
 
@@ -276,6 +286,7 @@ export async function getTeacherStudentHistory(
     select: {
       id: true,
       fullName: true,
+      studentId: true,
       email: true,
     },
   });
@@ -289,8 +300,9 @@ export async function getTeacherStudentHistory(
   return {
     student: {
       id: profile.id,
-      name: profile.fullName ?? profile.email,
-      email: profile.email,
+      name: profile.fullName ?? profile.studentId ?? profile.email,
+      studentId: profile.studentId ?? undefined,
+      email: isInternalStudentEmail(profile.email) ? undefined : profile.email,
     },
     sessions,
   };

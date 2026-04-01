@@ -32,7 +32,12 @@ export default async function TeacherStudentHistoryPage({ params }: Props) {
 
       <div className="mb-6">
         <h1 className="text-2xl font-medium text-stone-900">{data.student.name}</h1>
-        <p className="text-sm text-stone-500 mt-1">{data.student.email}</p>
+        {data.student.studentId && (
+          <p className="text-sm text-stone-500 mt-1">学号：{data.student.studentId}</p>
+        )}
+        {data.student.email && (
+          <p className="text-sm text-stone-500 mt-1">{data.student.email}</p>
+        )}
       </div>
 
       <FeedbackSessionList

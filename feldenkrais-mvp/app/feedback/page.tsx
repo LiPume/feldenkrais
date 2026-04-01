@@ -1,11 +1,11 @@
-import { UserRole } from '@prisma/client';
 import Link from 'next/link';
 import FeedbackSessionList from '@/components/feedback/FeedbackSessionList';
 import { requireRole } from '@/server/auth/require-role';
+import { FEEDBACK_ACCESS_ROLES } from '@/server/auth/role-groups';
 import { getFeedbackSessionsByStudentProfileId } from '@/server/queries/feedback';
 
 export default async function FeedbackListPage() {
-  const { profile } = await requireRole(UserRole.STUDENT);
+  const { profile } = await requireRole(FEEDBACK_ACCESS_ROLES);
   const sessions = await getFeedbackSessionsByStudentProfileId(profile.id);
 
   return (

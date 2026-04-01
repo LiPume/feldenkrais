@@ -17,6 +17,8 @@ export default function FeedbackSessionCard({
   showStudent = false,
   showStudentLink = false,
 }: Props) {
+  const studentLabel = `学生：${session.studentName}${session.studentId ? ` · ${session.studentId}` : ''}${session.studentEmail ? ` · ${session.studentEmail}` : ''}`;
+
   return (
     <div className="bg-white rounded-2xl border border-stone-200 p-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -44,11 +46,11 @@ export default function FeedbackSessionCard({
                 href={`/teacher/students/${session.studentProfileId}`}
                 className="inline-flex mt-1 text-sm text-stone-500 hover:text-stone-800 transition-colors"
               >
-                学生：{session.studentName} · {session.studentEmail}
+                {studentLabel}
               </Link>
             ) : (
               <p className="text-sm text-stone-500 mt-1">
-                学生：{session.studentName} · {session.studentEmail}
+                {studentLabel}
               </p>
             )
           )}

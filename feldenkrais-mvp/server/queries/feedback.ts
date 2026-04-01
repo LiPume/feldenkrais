@@ -3,6 +3,7 @@ import {
   LeftRightDiff,
   type Prisma,
 } from '@prisma/client';
+import { isInternalStudentEmail } from '@/lib/auth/student-account';
 import { formatDateOnly } from '@/lib/utils/date';
 import { parseDateOnly } from '@/lib/utils/date';
 import type { BodyRegionCode } from '@/types/body-region';
@@ -29,6 +30,7 @@ const feedbackSessionInclude = {
     select: {
       id: true,
       fullName: true,
+      studentId: true,
       email: true,
     },
   },
@@ -110,7 +112,13 @@ function mapFeedbackEntry(
 }
 
 function mapFeedbackSession(session: FeedbackSessionWithRelations): FeedbackSessionListItem {
-  const studentName = session.studentProfile.fullName ?? session.studentProfile.email;
+  const studentName =
+    session.studentProfile.fullName ??
+    session.studentProfile.studentId ??
+    session.studentProfile.email;
+  const studentEmail = isInternalStudentEmail(session.studentProfile.email)
+    ? undefined
+    : session.studentProfile.email;
 
   return {
     id: session.id,
@@ -122,7 +130,8 @@ function mapFeedbackSession(session: FeedbackSessionWithRelations): FeedbackSess
     createdAt: session.createdAt.toISOString(),
     studentProfileId: session.studentProfile.id,
     studentName,
-    studentEmail: session.studentProfile.email,
+    studentId: session.studentProfile.studentId ?? undefined,
+    studentEmail,
     entries: session.bodyPartEntries.map(mapFeedbackEntry),
   };
 }

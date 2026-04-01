@@ -76,7 +76,8 @@ export type FeedbackSessionListItem = {
   createdAt: string;
   studentProfileId: string;
   studentName: string;
-  studentEmail: string;
+  studentId?: string;
+  studentEmail?: string;
   entries: FeedbackBodyPartListItem[];
 };
 
@@ -101,13 +102,18 @@ export type FeedbackLabelStat = {
 export type StudentFeedbackSummary = {
   studentProfileId: string;
   studentName: string;
-  studentEmail: string;
+  studentId?: string;
+  studentEmail?: string;
   feedbackCount: number;
+  hasSubmitted: boolean;
   lastFeedbackDate?: string;
 };
 
 export type TeacherDashboardData = {
   totalFeedbackSessions: number;
+  registeredStudentCount: number;
+  submittedStudentCount: number;
+  missingStudentCount: number;
   practiceStats: PracticeFeedbackStat[];
   bodyRegionStats: BodyRegionFeedbackStat[];
   labelStats: FeedbackLabelStat[];
@@ -186,7 +192,8 @@ export type TeacherStudentHistory = {
   student: {
     id: string;
     name: string;
-    email: string;
+    studentId?: string;
+    email?: string;
   };
   sessions: FeedbackSessionListItem[];
 };

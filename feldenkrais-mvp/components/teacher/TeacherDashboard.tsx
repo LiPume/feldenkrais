@@ -31,22 +31,23 @@ export default function TeacherDashboard({ teacherName, data, filters }: Props) 
             {data.totalFeedbackSessions}
           </p>
         </div>
-        <div className="rounded-2xl border border-stone-200 bg-white p-5 md:col-span-3">
-          <p className="text-sm text-stone-500 mb-3">老师端最小统计范围</p>
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">
-              某练习反馈数
-            </span>
-            <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">
-              身体部位出现次数
-            </span>
-            <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">
-              常见反馈标签
-            </span>
-            <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">
-              学生反馈历史
-            </span>
-          </div>
+        <div className="rounded-2xl border border-stone-200 bg-white p-5">
+          <p className="text-sm text-stone-500">已注册学生</p>
+          <p className="mt-2 text-3xl font-medium text-stone-900">
+            {data.registeredStudentCount}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-stone-200 bg-white p-5">
+          <p className="text-sm text-stone-500">当前筛选下已填写</p>
+          <p className="mt-2 text-3xl font-medium text-stone-900">
+            {data.submittedStudentCount}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-stone-200 bg-white p-5">
+          <p className="text-sm text-stone-500">当前筛选下未填写</p>
+          <p className="mt-2 text-3xl font-medium text-stone-900">
+            {data.missingStudentCount}
+          </p>
         </div>
       </div>
 
@@ -84,14 +85,17 @@ export default function TeacherDashboard({ teacherName, data, filters }: Props) 
 
         <section className="rounded-2xl border border-stone-200 bg-white p-5">
           <div className="flex items-center justify-between gap-4 mb-4">
-            <h2 className="text-lg font-medium text-stone-900">学生反馈历史入口</h2>
+            <h2 className="text-lg font-medium text-stone-900">学生填写情况</h2>
             <span className="text-xs text-stone-400">
               共 {data.studentSummaries.length} 位学生
             </span>
           </div>
+          <p className="mb-4 text-sm text-stone-500">
+            这里会列出所有已注册学生。次数为 0 表示当前筛选范围内还没有填写反馈。
+          </p>
           <TeacherStatList
             items={data.studentSummaries.map((item) => ({
-              label: `${item.studentName} · ${item.studentEmail}`,
+              label: `${item.studentName}${item.studentId ? ` · ${item.studentId}` : ''}${item.hasSubmitted ? '' : ' · 未填写'}`,
               value: item.feedbackCount,
               href: `/teacher/students/${item.studentProfileId}`,
             }))}

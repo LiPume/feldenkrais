@@ -28,6 +28,7 @@ export default async function LoginPage() {
       <h1 className="text-2xl font-medium text-stone-900 mb-2">登录 / 注册</h1>
       <p className="text-sm text-stone-500 mb-8">
         学生和老师共用同一个项目，通过角色控制可访问的数据和页面。
+        学生现在使用学号登录，老师继续使用邮箱登录。
       </p>
 
       <div className="mb-8 rounded-2xl border border-stone-200 bg-white p-5">

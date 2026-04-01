@@ -1,6 +1,5 @@
 'use server';
 
-import { UserRole } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { ZodError } from 'zod';
@@ -15,6 +14,7 @@ import type {
   LegacyFeedbackRecord,
 } from '@/types/feedback';
 import { requireRole } from '@/server/auth/require-role';
+import { FEEDBACK_ACCESS_ROLES } from '@/server/auth/role-groups';
 import {
   createFeedbackSessionForStudent,
   importLegacyFeedbackSessionsForStudent,
@@ -24,7 +24,7 @@ export async function createFeedbackSessionAction(
   input: CreateFeedbackSessionPayload,
 ): Promise<FeedbackActionResult> {
   try {
-    const { profile } = await requireRole(UserRole.STUDENT);
+    const { profile } = await requireRole(FEEDBACK_ACCESS_ROLES);
     const payload = parseCreateFeedbackSessionPayload(input);
     const session = await createFeedbackSessionForStudent(profile.id, payload);
 
@@ -58,7 +58,7 @@ export async function importLegacyFeedbackSessionsAction(
   input: LegacyFeedbackRecord[],
 ): Promise<LegacyFeedbackImportResult> {
   try {
-    const { profile } = await requireRole(UserRole.STUDENT);
+    const { profile } = await requireRole(FEEDBACK_ACCESS_ROLES);
     const records = parseLegacyFeedbackRecords(input);
     const result = await importLegacyFeedbackSessionsForStudent(profile.id, records);
 

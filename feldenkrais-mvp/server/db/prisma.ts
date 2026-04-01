@@ -7,8 +7,12 @@ const globalForPrisma = globalThis as typeof globalThis & {
 };
 
 function createPrismaClient() {
-  const { databaseUrl } = getDatabaseEnv();
-  const adapter = new PrismaPg(databaseUrl);
+  const { databaseUrl, directUrl } = getDatabaseEnv();
+  const runtimeUrl =
+    process.env.NODE_ENV === 'development'
+      ? directUrl
+      : databaseUrl;
+  const adapter = new PrismaPg(runtimeUrl);
 
   return new PrismaClient({
     adapter,

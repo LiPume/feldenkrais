@@ -39,9 +39,9 @@ DIRECT_URL=
 说明：
 
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`：前端和服务端共用的 Supabase 项目访问配置
-- `DATABASE_URL`：Prisma 走连接池时使用
-- `DIRECT_URL`：Prisma migration / introspection 时直连数据库使用
-- `SUPABASE_SERVICE_ROLE_KEY`：后续管理任务和服务端管理接口预留
+- `DATABASE_URL`：Supabase pooled 连接串，通常是 `pooler.supabase.com` + `6543`
+- `DIRECT_URL`：Supabase direct 连接串，应该使用 `db.<project-ref>.supabase.co:5432`，不要继续填 pooler 地址
+- `SUPABASE_SERVICE_ROLE_KEY`：学生学号注册、服务端管理任务和后续管理接口使用
 
 ## 数据库相关命令
 
@@ -55,7 +55,7 @@ npm run db:seed
 说明：
 
 - Prisma 7 的 CLI 数据源配置放在 `prisma.config.ts`
-- 运行时 `PrismaClient` 通过 `@prisma/adapter-pg` 使用 `DATABASE_URL`
+- 本地开发时 `PrismaClient` 优先使用 `DIRECT_URL`，部署环境继续使用 `DATABASE_URL`
 - migration / introspection 通过 `DIRECT_URL` 走 `prisma.config.ts`
 
 ## 页面路由
