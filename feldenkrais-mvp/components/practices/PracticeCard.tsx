@@ -15,26 +15,33 @@ export default function PracticeCard({ practice }: Props) {
   return (
     <Link
       href={`/practices/${practice.slug}`}
-      className="block bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-400 hover:shadow-sm transition-all"
+      className="practice-card"
     >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className="text-sm font-medium text-stone-900 leading-snug">
-          {practice.title}
-        </h3>
-        {practice.durationSec ? (
-          <span className="text-xs text-stone-400 whitespace-nowrap">
+      <div className="practice-card-inner">
+        <div className="practice-card-body">
+          <h3 className="practice-card-title">{practice.title}</h3>
+          {practice.courseName && (
+            <p className="practice-card-course">{practice.courseName}</p>
+          )}
+          {practice.summary && (
+            <p className="practice-card-summary">{practice.summary}</p>
+          )}
+        </div>
+        {practice.durationSec && (
+          <div className="practice-card-duration">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
             {formatDuration(practice.durationSec)}
-          </span>
-        ) : null}
+          </div>
+        )}
       </div>
-      {practice.courseName ? (
-        <p className="text-xs text-stone-400 mb-2">{practice.courseName}</p>
-      ) : null}
-      {practice.summary ? (
-        <p className="text-xs text-stone-500 leading-relaxed line-clamp-2">
-          {practice.summary}
-        </p>
-      ) : null}
+      <div className="practice-card-arrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </div>
     </Link>
   );
 }

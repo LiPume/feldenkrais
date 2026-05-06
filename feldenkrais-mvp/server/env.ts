@@ -8,15 +8,20 @@ function requireServerEnv(name: 'DATABASE_URL' | 'DIRECT_URL' | 'SUPABASE_SERVIC
   return value;
 }
 
-export function hasDatabaseEnv(): boolean {
-  return Boolean(process.env.DATABASE_URL && process.env.DIRECT_URL);
+export function hasRuntimeDatabaseEnv(): boolean {
+  return Boolean(process.env.DATABASE_URL);
 }
 
-export function getDatabaseEnv() {
-  return {
-    databaseUrl: requireServerEnv('DATABASE_URL'),
-    directUrl: requireServerEnv('DIRECT_URL'),
-  };
+export function getRuntimeDatabaseUrl(): string {
+  return requireServerEnv('DATABASE_URL');
+}
+
+export function hasDirectDatabaseEnv(): boolean {
+  return Boolean(process.env.DIRECT_URL);
+}
+
+export function getDirectDatabaseUrl(): string {
+  return requireServerEnv('DIRECT_URL');
 }
 
 export function hasSupabaseServiceRoleKey(): boolean {

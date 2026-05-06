@@ -8,8 +8,8 @@ let browserClient: SupabaseClient | undefined;
 
 export function createSupabaseBrowserClient(): SupabaseClient {
   if (!browserClient) {
-    const { supabaseUrl, supabaseAnonKey } = getPublicSupabaseEnv();
-    browserClient = createBrowserClient(supabaseUrl, supabaseAnonKey);
+    const { supabaseUrl, supabaseBrowserKey } = getPublicSupabaseEnv();
+    browserClient = createBrowserClient(supabaseUrl, supabaseBrowserKey);
   }
 
   return browserClient;

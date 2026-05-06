@@ -5,7 +5,7 @@ export default function SignOutButton() {
     <form action={signOut}>
       <button
         type="submit"
-        className="text-sm text-stone-500 hover:text-stone-900 transition-colors"
+        className="signout-btn"
       >
         退出
       </button>

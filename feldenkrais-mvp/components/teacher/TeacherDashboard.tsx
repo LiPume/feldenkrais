@@ -1,15 +1,37 @@
 import type { TeacherDashboardData } from '@/types/feedback';
 import type { TeacherFeedbackFilters } from '@/types/feedback';
+import Link from 'next/link';
 import TeacherFeedbackFiltersForm from '@/components/teacher/TeacherFeedbackFiltersForm';
 import TeacherStatList from '@/components/teacher/TeacherStatList';
+
+type PaginationInfo = {
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  hasMore: boolean;
+};
 
 type Props = {
   teacherName: string;
   data: TeacherDashboardData;
   filters: TeacherFeedbackFilters;
+  pagination: PaginationInfo;
 };
 
-export default function TeacherDashboard({ teacherName, data, filters }: Props) {
+function buildPaginationUrl(base: string, page: number, filters: TeacherFeedbackFilters): string {
+  const params = new URLSearchParams();
+  if (page > 1) params.set('page', String(page));
+  if (filters.phase) params.set('phase', filters.phase);
+  if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
+  if (filters.dateTo) params.set('dateTo', filters.dateTo);
+  const qs = params.toString();
+  return `${base}${qs ? '?' + qs : ''}`;
+}
+
+export default function TeacherDashboard({ teacherName, data, filters, pagination }: Props) {
+  const { page, pageSize, totalCount, hasMore } = pagination;
+  const baseHref = '/teacher';
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
       <div className="space-y-2">
@@ -87,11 +109,11 @@ export default function TeacherDashboard({ teacherName, data, filters }: Props) 
           <div className="flex items-center justify-between gap-4 mb-4">
             <h2 className="text-lg font-medium text-stone-900">学生填写情况</h2>
             <span className="text-xs text-stone-400">
-              共 {data.studentSummaries.length} 位学生
+              第 {((page - 1) * pageSize) + 1}–{Math.min(page * pageSize, totalCount)} / 共 {totalCount} 位
             </span>
           </div>
           <p className="mb-4 text-sm text-stone-500">
-            这里会列出所有已注册学生。次数为 0 表示当前筛选范围内还没有填写反馈。
+            按学号排序，每页 {pageSize} 人。
           </p>
           <TeacherStatList
             items={data.studentSummaries.map((item) => ({
@@ -100,6 +122,28 @@ export default function TeacherDashboard({ teacherName, data, filters }: Props) 
               href: `/teacher/students/${item.studentProfileId}`,
             }))}
           />
+          {(page > 1 || hasMore) && (
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-stone-100">
+              {page > 1 ? (
+                <Link
+                  href={buildPaginationUrl(baseHref, page - 1, filters)}
+                  className="text-sm text-stone-500 hover:text-stone-800 transition-colors"
+                >
+                  ← 上一页
+                </Link>
+              ) : (
+                <span />
+              )}
+              {hasMore && (
+                <Link
+                  href={buildPaginationUrl(baseHref, page + 1, filters)}
+                  className="text-sm text-stone-500 hover:text-stone-800 transition-colors"
+                >
+                  下一页 →
+                </Link>
+              )}
+            </div>
+          )}
         </section>
       </div>
     </div>

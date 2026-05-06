@@ -48,14 +48,8 @@ export default function FeedbackFormClient({ practiceId, practiceTitle, practice
   const [isPending, startTransition] = useTransition();
 
   const activeEntry = useMemo(() => {
-    if (!form.activeRegionCode) {
-      return null;
-    }
-
-    return (
-      form.entriesByRegionCode[form.activeRegionCode] ??
-      createEmptyEntry(form.activeRegionCode)
-    );
+    if (!form.activeRegionCode) return null;
+    return form.entriesByRegionCode[form.activeRegionCode] ?? createEmptyEntry(form.activeRegionCode);
   }, [form.activeRegionCode, form.entriesByRegionCode]);
 
   const completedCount = form.selectedRegionCodes.filter((code) => {
@@ -65,43 +59,33 @@ export default function FeedbackFormClient({ practiceId, practiceTitle, practice
 
   const setPhase = (feedbackPhase: FeedbackPhaseValue) => {
     setError(null);
-    setForm((previous) => ({
-      ...previous,
-      feedbackPhase,
-    }));
+    setForm((prev) => ({ ...prev, feedbackPhase }));
   };
 
   const toggleRegion = (bodyRegionCode: BodyRegionCode) => {
     setError(null);
-    setForm((previous) => {
-      const alreadySelected = previous.selectedRegionCodes.includes(bodyRegionCode);
-
+    setForm((prev) => {
+      const alreadySelected = prev.selectedRegionCodes.includes(bodyRegionCode);
       if (alreadySelected) {
-        const selectedRegionCodes = previous.selectedRegionCodes.filter(
-          (code) => code !== bodyRegionCode,
-        );
-        const entriesByRegionCode = { ...previous.entriesByRegionCode };
+        const selectedRegionCodes = prev.selectedRegionCodes.filter((c) => c !== bodyRegionCode);
+        const entriesByRegionCode = { ...prev.entriesByRegionCode };
         delete entriesByRegionCode[bodyRegionCode];
-
         return {
-          ...previous,
+          ...prev,
           selectedRegionCodes,
-          activeRegionCode:
-            previous.activeRegionCode === bodyRegionCode
-              ? selectedRegionCodes[0] ?? null
-              : previous.activeRegionCode,
+          activeRegionCode: prev.activeRegionCode === bodyRegionCode
+            ? selectedRegionCodes[0] ?? null
+            : prev.activeRegionCode,
           entriesByRegionCode,
         };
       }
-
       return {
-        ...previous,
-        selectedRegionCodes: [...previous.selectedRegionCodes, bodyRegionCode],
-        activeRegionCode: previous.activeRegionCode ?? bodyRegionCode,
+        ...prev,
+        selectedRegionCodes: [...prev.selectedRegionCodes, bodyRegionCode],
+        activeRegionCode: prev.activeRegionCode ?? bodyRegionCode,
         entriesByRegionCode: {
-          ...previous.entriesByRegionCode,
-          [bodyRegionCode]:
-            previous.entriesByRegionCode[bodyRegionCode] ?? createEmptyEntry(bodyRegionCode),
+          ...prev.entriesByRegionCode,
+          [bodyRegionCode]: prev.entriesByRegionCode[bodyRegionCode] ?? createEmptyEntry(bodyRegionCode),
         },
       };
     });
@@ -109,10 +93,10 @@ export default function FeedbackFormClient({ practiceId, practiceTitle, practice
 
   const updateEntry = (nextEntry: FeedbackBodyPartDraft) => {
     setError(null);
-    setForm((previous) => ({
-      ...previous,
+    setForm((prev) => ({
+      ...prev,
       entriesByRegionCode: {
-        ...previous.entriesByRegionCode,
+        ...prev.entriesByRegionCode,
         [nextEntry.bodyRegionCode]: nextEntry,
       },
     }));
@@ -123,26 +107,16 @@ export default function FeedbackFormClient({ practiceId, practiceTitle, practice
       setError('请先至少选择 1 个身体部位。');
       return;
     }
-
-    const missingIntensityRegionCodes = form.selectedRegionCodes.filter((code) => {
+    const missing = form.selectedRegionCodes.filter((code) => {
       const entry = form.entriesByRegionCode[code];
       return entry?.intensityScore === null || entry?.intensityScore === undefined;
     });
-
-    if (missingIntensityRegionCodes.length > 0) {
-      const firstRegionCode = missingIntensityRegionCodes[0];
-      const regionNames = missingIntensityRegionCodes
-        .map((code) => getRegionByCode(code)?.nameZh ?? code)
-        .join('、');
-
-      setForm((previous) => ({
-        ...previous,
-        activeRegionCode: firstRegionCode,
-      }));
-      setError(`请先为这些部位填写强度：${regionNames}`);
+    if (missing.length > 0) {
+      const names = missing.map((c) => getRegionByCode(c)?.nameZh ?? c).join('、');
+      setForm((prev) => ({ ...prev, activeRegionCode: missing[0] }));
+      setError(`请先为这些部位填写强度：${names}`);
       return;
     }
-
     const payload: CreateFeedbackSessionPayload = {
       practiceId: form.practiceId,
       practiceTitleSnapshot: form.practiceTitle,
@@ -150,7 +124,6 @@ export default function FeedbackFormClient({ practiceId, practiceTitle, practice
       feedbackDate: form.feedbackDate,
       entries: form.selectedRegionCodes.map((bodyRegionCode, sortOrder) => {
         const entry = form.entriesByRegionCode[bodyRegionCode]!;
-
         return {
           bodyRegionCode,
           sortOrder,
@@ -161,17 +134,14 @@ export default function FeedbackFormClient({ practiceId, practiceTitle, practice
         };
       }),
     };
-
     startTransition(() => {
       void (async () => {
         setError(null);
         const result = await createFeedbackSessionAction(payload);
-
         if (!result.success) {
           setError(result.error ?? '保存失败，请稍后再试。');
           return;
         }
-
         setSavedSessionId(result.sessionId ?? 'saved');
       })();
     });
@@ -179,166 +149,165 @@ export default function FeedbackFormClient({ practiceId, practiceTitle, practice
 
   if (savedSessionId) {
     return (
-      <div className="max-w-md mx-auto px-6 py-16 text-center">
-        <div className="mb-6">
-          <div className="text-5xl mb-4">&#10003;</div>
-          <h2 className="text-xl font-medium text-stone-900 mb-2">反馈已保存到数据库</h2>
-          <p className="text-sm text-stone-500">
-            每个选中部位都已经按独立明细保存，可以到“我的反馈”查看。
+      <div className="feedback-success">
+        <div className="feedback-success-card card">
+          <div className="feedback-success-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h2 className="feedback-success-title">反馈已保存</h2>
+          <p className="feedback-success-desc">
+            每个选中部位都已按独立明细保存。可以在「我的反馈」中查看完整历史轨迹。
           </p>
-        </div>
-        <div className="flex flex-col gap-3">
-          <Link
-            href="/feedback"
-            className="block w-full text-center px-6 py-4 bg-stone-900 text-white text-base font-medium rounded-xl"
-          >
-            查看我的反馈
-          </Link>
-          <Link
-            href={practiceSlug ? `/practices/${practiceSlug}` : '/practice-search'}
-            className="block w-full text-center px-6 py-4 bg-white border border-stone-300 text-stone-800 text-base font-medium rounded-xl"
-          >
-            返回上一页
-          </Link>
+          <div className="feedback-success-actions">
+            <Link href="/feedback" className="btn-primary">查看我的反馈</Link>
+            <Link
+              href={practiceSlug ? `/practices/${practiceSlug}` : '/practice-search'}
+              className="btn-secondary"
+            >
+              返回练习页
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8">
-      <Link
-        href={practiceSlug ? `/practices/${practiceSlug}` : '/practice-search'}
-        className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-800 mb-6 transition-colors"
-      >
-        <span>&#8592;</span>
-        <span>返回</span>
-      </Link>
+    <div className="feedback-form-page">
+      <div className="feedback-form-inner">
+        {/* Page header */}
+        <div className="feedback-form-header animate-fade-in-up">
+          <Link
+            href={practiceSlug ? `/practices/${practiceSlug}` : '/practice-search'}
+            className="feedback-back-link"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            返回
+          </Link>
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-medium text-stone-900 mb-1">做反馈</h1>
-        <p className="text-sm text-stone-500">
-          现在每个身体部位都会分别记录强度、标签、左右差异和备注。
-        </p>
-        {form.practiceTitle && (
-          <p className="text-sm text-stone-500 mt-2">
-            练习：<span className="text-stone-700">{form.practiceTitle}</span>
-          </p>
-        )}
-      </div>
-
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
-        <div className="bg-white rounded-2xl border border-stone-200 p-5">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div className="flex gap-2">
-              {FEEDBACK_PHASE_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setPhase(option.value)}
-                  className={`px-4 py-2 text-sm rounded-xl border transition-colors ${
-                    form.feedbackPhase === option.value
-                      ? 'bg-stone-900 text-white border-stone-900'
-                      : 'bg-white text-stone-600 border-stone-300 hover:border-stone-400'
-                  }`}
-                >
-                  {option.name}
-                </button>
-              ))}
+          <div className="feedback-form-heading">
+            <div>
+              <p className="section-eyebrow">记录反馈</p>
+              <h1 className="feedback-form-title">做反馈</h1>
             </div>
-            <span className="text-xs text-stone-400">记录日期：{form.feedbackDate}</span>
+            {form.practiceTitle && (
+              <span className="feedback-practice-badge">{form.practiceTitle}</span>
+            )}
           </div>
 
-          <BodyMap selectedCodes={form.selectedRegionCodes} multiSelect onToggle={toggleRegion} />
-
-          <div className="mt-4 rounded-xl bg-stone-50 border border-stone-200 px-4 py-3 text-sm text-stone-500">
-            左侧可以多选身体部位。选中多个部位后，请在右侧逐个填写每个部位的独立反馈。
-          </div>
+          <p className="feedback-form-hint">
+            每个身体部位独立填写强度、标签、左右差异和备注。
+          </p>
         </div>
 
-        <div className="flex flex-col gap-5">
-          {form.selectedRegionCodes.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-dashed border-stone-300 p-8 text-center">
-              <p className="text-stone-700 text-base mb-2">先在左侧选择身体部位</p>
-              <p className="text-sm text-stone-400">
-                你可以一次选择多个部位，然后在这里逐个填写它们的强度、标签、左右差异和备注。
+        {/* Main layout */}
+        <div className="feedback-form-grid animate-fade-in-up" style={{ animationDelay: '80ms' }}>
+          {/* Left: body map */}
+          <div className="feedback-map-panel">
+            <div className="card feedback-map-card">
+              {/* Phase toggle */}
+              <div className="feedback-phase-row">
+                <div className="feedback-phase-toggle">
+                  {FEEDBACK_PHASE_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setPhase(option.value)}
+                      className={`feedback-phase-btn ${form.feedbackPhase === option.value ? 'feedback-phase-btn--active' : ''}`}
+                    >
+                      {option.name}
+                    </button>
+                  ))}
+                </div>
+                <span className="feedback-date">{form.feedbackDate}</span>
+              </div>
+
+              <BodyMap
+                selectedCodes={form.selectedRegionCodes}
+                multiSelect
+                onToggle={toggleRegion}
+              />
+
+              <p className="feedback-map-hint">
+                点击身体部位，最多可选多个部位
               </p>
             </div>
-          ) : (
-            <>
-              <div className="bg-white rounded-2xl border border-stone-200 p-4">
-                <div className="flex flex-wrap gap-2">
+          </div>
+
+          {/* Right: editor */}
+          <div className="feedback-editor-panel">
+            {form.selectedRegionCodes.length === 0 ? (
+              <div className="card feedback-empty-editor">
+                <div className="feedback-empty-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  </svg>
+                </div>
+                <p className="feedback-empty-title">先选择身体部位</p>
+                <p className="feedback-empty-desc">
+                  点击左侧人体图，选择你要记录感受的部位。可以一次选多个，然后逐个填写。
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Region tabs */}
+                <div className="feedback-region-tabs">
                   {form.selectedRegionCodes.map((code) => {
                     const region = getRegionByCode(code);
                     const entry = form.entriesByRegionCode[code];
                     const isActive = form.activeRegionCode === code;
-                    const isComplete =
-                      entry?.intensityScore !== null && entry?.intensityScore !== undefined;
-
-                    if (!region) {
-                      return null;
-                    }
-
+                    const isComplete = entry?.intensityScore !== null && entry?.intensityScore !== undefined;
+                    if (!region) return null;
                     return (
                       <button
                         key={code}
                         type="button"
-                        onClick={() =>
-                          setForm((previous) => ({
-                            ...previous,
-                            activeRegionCode: code,
-                          }))
-                        }
-                        className={`rounded-xl border px-4 py-3 text-left transition-colors ${
-                          isActive
-                            ? 'border-stone-900 bg-stone-900 text-white'
-                            : 'border-stone-300 bg-white text-stone-700 hover:border-stone-400'
-                        }`}
+                        onClick={() => setForm((prev) => ({ ...prev, activeRegionCode: code }))}
+                        className={`feedback-region-tab ${isActive ? 'feedback-region-tab--active' : ''} ${isComplete ? 'feedback-region-tab--complete' : ''}`}
                       >
-                        <div className="text-sm font-medium">{region.nameZh}</div>
-                        <div
-                          className={`text-xs mt-1 ${
-                            isActive ? 'text-stone-200' : 'text-stone-400'
-                          }`}
-                        >
-                          {isComplete ? `强度 ${entry?.intensityScore}` : '待填写强度'}
-                        </div>
+                        <span className="feedback-region-tab-name">{region.nameZh}</span>
+                        <span className="feedback-region-tab-status">
+                          {isComplete ? entry?.intensityScore : '待填'}
+                        </span>
                       </button>
                     );
                   })}
                 </div>
-              </div>
 
-              {activeEntry && (
-                <FeedbackBodyPartEditor entry={activeEntry} onChange={updateEntry} />
-              )}
-            </>
-          )}
+                {activeEntry && (
+                  <FeedbackBodyPartEditor entry={activeEntry} onChange={updateEntry} />
+                )}
+              </>
+            )}
 
-          <div className="bg-white rounded-2xl border border-stone-200 p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-stone-800">
-                  已完成 {completedCount} / {form.selectedRegionCodes.length} 个部位
+            {/* Submit bar */}
+            <div className="feedback-submit-bar card">
+              <div className="feedback-submit-info">
+                <p className="feedback-submit-count">
+                  已完成 <strong>{completedCount}</strong> / {form.selectedRegionCodes.length} 个部位
                 </p>
-                <p className="text-xs text-stone-400 mt-1">
-                  每个选中的部位都会生成一条独立明细。
+                <p className="feedback-submit-hint">
+                  所有部位填写强度后即可保存
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={isPending}
-                className="px-6 py-3 bg-stone-900 text-white text-sm font-medium rounded-xl hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary"
               >
                 {isPending ? '保存中...' : '保存反馈'}
               </button>
             </div>
 
             {error && (
-              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {error}
-              </div>
+              <div className="form-alert form-alert--error feedback-error">{error}</div>
             )}
           </div>
         </div>

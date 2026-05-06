@@ -945,8 +945,16 @@ export type CreateFeedbackSessionPayload = {
     导航、老师端学生详情和最近反馈不再显示系统生成的内部邮箱
 30. 学生注册已改为服务端直接建号并立即确认
     不再依赖 Supabase 邮箱确认，因此学号注册后可以直接登录，不会再卡在收不到确认邮件
-31. 本地开发时 Prisma 已改为优先使用 `DIRECT_URL`
-    这样可以避开本地对 pooler 的依赖；同时 `DIRECT_URL` 必须是真正的 direct 连接串，不能再填成 pooler 地址
+31. Next.js 运行时的 Prisma 已统一回到 `DATABASE_URL`
+    `DIRECT_URL` 只保留给 migration 和管理脚本使用；连接串形式以 Supabase 控制台给到的实际值为准
+32. 角色路由与导航已做一次集中重构
+    登录后统一回到 `/` 工作台；顶部导航按角色显示；无权限页会根据当前角色给出更合适的返回入口
+33. 首页已从统一营销页改成“登录后工作台 / 未登录公共首页”
+    学生和老师登录后不再共用同一套首页文案与入口，老师视图和个人使用入口也已拆开
+34. 老师与学生分层已收口到统一的角色路由模块
+    首页、登录后落点、顶部导航、无权限页和角色跳转规则已集中到 `lib/auth/role-routing.ts`，避免之前那种到处散落判断、互相串跳的情况
+35. 学生登录不再先查 `user_profiles` 才能推导认证邮箱
+    学号会直接映射成内部认证邮箱，减少登录链路对 Prisma 查询的依赖；数据库异常时也会返回可读错误，而不是把原始异常直接甩到页面
 
 ### 本轮删除 / 下线的旧实现
 
@@ -985,19 +993,275 @@ export type CreateFeedbackSessionPayload = {
 14. 老师端“学生填写情况”会显示所有已注册学生，0 次即表示当前筛选范围内未填写
 15. 学生现在直接用学号登录，老师仍然用邮箱登录
 16. 学生注册后可立即登录，不再受邮箱确认开关影响
-17. 本地开发建议优先校验 `DIRECT_URL`，如果 Supabase pooler 不稳定，本地开发仍可继续
+17. Next.js 运行时使用 `DATABASE_URL`，`DIRECT_URL` 只用于 migration 和脚本
+18. 学生和老师现在各自有更清晰的工作台与导航，不再互相暴露一整套无关入口
+
+## 2026-04-21 开发日志
+
+### 本轮概述
+
+本轮在第 5、6 步基础上继续推进，完成了以下工作：
+
+1. 新增 `lib/auth/role-routing.ts`
+   集中管理角色路由判断：导航项、登录后落点、用户名显示、无权限页文案，全部收口到同一模块
+2. 新增 `server/actions/admin-auth.ts` + `components/auth/AdminLoginForm.tsx`
+   为管理后台单独一套登录入口，老师使用邮箱登录，后台判断 TEACHER 角色后放行
+3. 新增 `app/admin/login/page.tsx` + `app/admin/page.tsx`
+   `/admin/login` 为专用登录页，`/admin` 做角色拦截后 redirect 到 `/teacher`
+4. 重写 `app/layout.tsx`
+   字体加载移到模块作用域（Turbopack 兼容）；增加 Role tag 显示；所有导航项由 `role-routing` 统一提供
+5. 新写 `app/page.tsx`
+   未登录显示 `PublicHome`，登录后按角色显示 `RoleWorkspaceHome`，不再共用同一套首页
+6. 新增 `components/home/PublicHome.tsx`
+   公共首页：Hero 区域 + 三个功能亮点卡片 + CTA，访客可直接浏览练习和登录
+7. 新增 `components/home/RoleWorkspaceHome.tsx`
+   登录后工作台：学生和老师各自一套入口区块，老师还有"管理"与"个人"分层入口
+8. 重写 `components/auth/LoginForm.tsx`
+   学生入口支持登录/注册切换；学生走学号流程，老师邮箱登录拆到独立后台入口
+9. 重写 `components/auth/SignOutButton.tsx`
+   清理退出登录按钮样式，路由按 `role-routing` 统一跳转
+10. 重写 `app/feedback/page.tsx`
+    反馈列表页由 `FeedbackSessionList` 承接，`requireRole` 允许 TEACHER 和 STUDENT 共用
+11. 重写 `app/feedback/page.tsx` + `app/globals.css`
+    反馈记录页面样式升级，`FeedbackSessionCard` 支持 `showStudent` / `showStudentLink` 展示学生信息
+12. 重写 `components/feedback/FeedbackFormClient.tsx`
+    完整重构表单状态：每个选中部位独立草稿，tab 切换当前编辑部位，提交时一次性写 session + 多条 entry
+13. 新增 `components/feedback/FeedbackBodyPartEditor.tsx`
+    单部位编辑器：感受标签多选、强度 0-10、左右差异、备注，绑定到当前 active entry
+14. 新增 `components/feedback/FeedbackSessionList.tsx`
+    反馈列表容器，支持 empty 状态自定义、老师端展示学生信息
+15. 重写 `components/feedback/FeedbackSessionCard.tsx`
+    Session 卡片展示练习名、阶段、日期、各部位 entry 明细（强度、标签、左右差异、备注）
+16. 新增 `components/practices/PracticeCard.tsx`
+    练习卡片：标题、课程名、摘要、时长，右下角箭头指示
+17. 新增 `components/practices/PracticeSearchClient.tsx`
+    找练习页客户端：单选部位、过滤练习列表、empty 状态
+18. 重写 `app/components/body-map/BodyMap.tsx`
+    支持 `multiSelect` 模式，供反馈表单多选部位使用；正面/背面切换保留
+19. 重写 `server/auth/require-role.ts`
+    `requireRole` 支持单角色或角色数组；无权限时 query params 带上 `expected` 和 `actual`
+20. 重写 `server/db/prisma.ts`
+    Prisma 7 adapter 模式接入；global 缓存 + URL 变化重建，避免开发时重复连接
+21. 重写 `server/actions/auth.ts`
+    学生学号直接 upsert Supabase Auth 用户，无需邮箱确认；老师走邮箱密码登录；登录后落点由 `role-routing` 统一决定；禁止公开注册老师账号
+
+### 新增文件一览
+
+| 文件 | 用途 |
+|------|------|
+| `lib/auth/role-routing.ts` | 角色路由集中判断：导航项、落点、用户名、无权限文案 |
+| `server/actions/admin-auth.ts` | 管理后台老师专用邮箱登录 Server Action |
+| `components/auth/AdminLoginForm.tsx` | 管理后台登录表单（邮箱 + 密码，useActionState） |
+| `app/admin/login/page.tsx` | 管理后台专用登录页（已登录 TEACHER 直接 redirect） |
+| `app/admin/page.tsx` | 管理后台入口页（requireRole 后 redirect `/teacher`） |
+| `components/home/PublicHome.tsx` | 公共首页（ Hero + 亮点 + CTA，未登录访客用） |
+| `components/home/RoleWorkspaceHome.tsx` | 登录后工作台（学生/老师各自入口区块） |
+| `components/feedback/FeedbackBodyPartEditor.tsx` | 单部位编辑器（强度/标签/左右差异/备注） |
+| `components/feedback/FeedbackSessionList.tsx` | 反馈列表容器（支持 empty 自定义和老师展示学生） |
+| `components/practices/PracticeCard.tsx` | 练习卡片（标题、课程名、摘要、时长） |
+| `components/practices/PracticeSearchClient.tsx` | 找练习页客户端（部位单选 + 过滤） |
+
+### 路由结构
+
+```
+/ (首页)
+  ├── 未登录 → PublicHome（Hero + 功能介绍 + CTA）
+  └── 登录后 → RoleWorkspaceHome
+      ├── 学生 → 找练习 / 新建反馈 / 我的反馈
+      └── 老师 → 管理后台 / 练习库 / 个人反馈入口
+
+/login          学生学号登录 / 注册
+/admin/login    老师邮箱登录（专用入口）
+/admin          requireRole(TEACHER) → redirect /teacher
+/teacher        requireRole(TEACHER) → 老师工作台
+/teacher/students/[id]   老师查看学生历史
+/teacher/practices/[id] 老师查看练习统计
+
+/practice-search   找练习（服务端取练习，客户端部位筛选）
+/practices/[slug]  练习详情
+/feedback           我的反馈列表
+/feedback/new      新建反馈（session + 多 entry）
+/feedback/import-legacy   导入旧 localStorage 数据
+```
+
+### 角色路由核心规则
+
+| 函数 | 用途 |
+|------|------|
+| `getNavigationItems(role)` | 根据角色返回顶部导航项列表 |
+| `getPostAuthPath(role)` | 登录后 redirect 目标：TEACHER → `/teacher`，其他 → `/` |
+| `getUserDisplayLabel(input)` | 显示优先级：姓名 > 学号 > 邮箱（学生内部邮箱不显示） |
+| `getUnauthorizedState(input)` | 无权限页根据实际角色和期望角色生成合适文案 |
+| `serializeRole(role)` | DB 角色 enum 转 URL 字符串 |
+| `parseRoleListParam(value)` | URL query params 转角色数组 |
+
+### 管理后台登录流程
+
+1. 访问 `/admin/login` → 若已是 TEACHER 则 redirect `/teacher`
+2. 填写邮箱 + 密码 → `adminAuthenticate` Server Action
+3. Supabase `signInWithPassword` 认证 → `ensureProfileForUser` 同步 profile
+4. 检查 `profile.role === TEACHER`，不是则 signOut 并返回错误
+5. 通过 → redirect `/teacher`
 
 ### 仍待继续的下一步
 
 当前还有几项适合紧接着继续做：
 
-1. 手工验收真实导入流程
-   在浏览器中放入一份旧 key `feldenkrais_feedback_records`，验证导入后 session / body part entries 是否正确拆分
-2. 更细的老师端筛选
+1. 更细的老师端筛选
    如果后续老师需要更强分析能力，可以继续补学生筛选、练习筛选或标签筛选
-3. 老师端最近反馈总数 / 页级说明优化
-   当前已有分页能力，后续可以再补更明确的“当前窗口位置”提示
-4. 老师角色治理规则收口
-   当前 MVP 允许注册时自选老师 / 学生；如果后续进入真实使用阶段，建议改成邀请制或后台指派老师角色
-5. 登录与权限提示页还可继续统一视觉语言
-   当前首页已重做，但登录页和部分辅助页还可以继续精修
+2. 老师端最近反馈总数 / 页级说明优化
+   当前已有分页能力，后续可以再补更明确的当前窗口位置提示
+3. 登录与权限提示页统一视觉语言
+   首页已重做，公共首页已独立，管理后台登录页也已完成；后续可继续统一登录页、学生注册流程页面的视觉细节
+
+## 2026-04-23 开发日志
+
+### 登录链路第一轮上线加固
+
+1. 运行时数据库环境判断已从 migration 环境中拆开
+   登录、读当前用户、角色保护和 Prisma 运行时只再要求 `DATABASE_URL`；`DIRECT_URL` 只保留给 migration 和脚本，不再因为缺少它让线上登录看起来失效。
+2. 老师后台入口已收口为 `/teacher`，同时补回 `/admin` 兼容入口
+   `app/admin/login/page.tsx` 里“已登录老师”的跳转已改到 `/teacher`；新增 `app/admin/page.tsx` 作为旧链接兼容页，校验老师角色后再 redirect 到 `/teacher`，避免后台登录后跳去不存在页面。
+3. 新增 `proxy.ts` + `server/auth/supabase-proxy.ts`
+   按 Supabase SSR 官方方案补上 session 刷新链路，避免真实环境里出现“刷新后掉登录”或服务端拿不到最新 cookie 的问题。
+4. 公共 Supabase key 现已同时兼容 publishable key 和旧 anon key
+   `lib/env/public.ts` 现在优先读取 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`，旧项目仍可继续使用 `NEXT_PUBLIC_SUPABASE_ANON_KEY`，降低新项目接入时的配置误报概率。
+5. 登录页环境提示已改成运行时真实要求
+   学生页和后台登录页不再把 `DIRECT_URL` 写成登录必填；学生页额外注明“注册还需要 `SUPABASE_SERVICE_ROLE_KEY`”，并补上老师去 `/admin/login` 的明确入口提示。
+
+### 本轮影响文件
+
+| 文件 | 作用 |
+|------|------|
+| `feldenkrais-mvp/server/env.ts` | 拆分运行时数据库环境与 migration 环境 |
+| `feldenkrais-mvp/server/db/prisma.ts` | Prisma 运行时仅依赖 `DATABASE_URL` |
+| `feldenkrais-mvp/server/auth/get-optional-user.ts` | 当前用户读取改用运行时数据库环境判断 |
+| `feldenkrais-mvp/server/auth/require-user.ts` | 角色保护改为只要求运行时环境 |
+| `feldenkrais-mvp/server/auth/supabase-proxy.ts` | Supabase SSR session 刷新 helper |
+| `feldenkrais-mvp/proxy.ts` | Next.js Proxy 入口，负责更新 session cookie |
+| `feldenkrais-mvp/app/admin/page.tsx` | `/admin` 兼容入口，校验老师角色后转 `/teacher` |
+| `feldenkrais-mvp/app/admin/login/page.tsx` | 已登录老师直接进 `/teacher`，并更新环境提示 |
+| `feldenkrais-mvp/app/login/page.tsx` | 更新运行时环境提示，并注明学生注册额外依赖 |
+| `feldenkrais-mvp/lib/env/public.ts` | 支持 publishable key / anon key 双兼容 |
+| `feldenkrais-mvp/server/actions/auth.ts` | 登录错误提示改成真实运行时要求 |
+| `feldenkrais-mvp/server/actions/admin-auth.ts` | 后台登录错误提示改成真实运行时要求 |
+| `feldenkrais-mvp/.env.example` | 环境变量模板改为优先展示 publishable key |
+| `feldenkrais-mvp/README.md` | 同步最新登录入口、兼容路由与环境变量要求 |
+
+## 2026-04-23 开发日志（二）
+
+### 登录链路第二轮加固与环境诊断
+
+1. 根布局和练习页已显式改为动态渲染
+   `app/layout.tsx`、`app/practice-search/page.tsx`、`app/practices/[slug]/page.tsx` 现在明确声明 `force-dynamic`；`app/practices/[slug]/page.tsx` 同时移除了构建期 `generateStaticParams`，解决了生产构建卡在 `Collecting page data` 的问题。
+2. 生产构建现已恢复稳定
+   `npm run build` 已可完整通过，所有 App Router 页面都以动态服务端渲染方式输出，不再在构建阶段卡住。
+3. 新增统一的 Supabase 认证错误映射
+   `server/auth/auth-error-message.ts` 把 `ENOTFOUND`、`ETIMEDOUT`、`ECONNREFUSED`、`fetch failed` 和数据库连接错误统一转成可读文案；学生登录、学生注册、老师登录和退出登录都不再把底层网络异常直接炸到页面。
+4. 新增 `npm run auth:check` 环境诊断脚本
+   `scripts/check-auth-env.ts` 会检查 `NEXT_PUBLIC_SUPABASE_URL`、Supabase public key 来源、数据库 host 解析，以及 `/auth/v1/health` 是否可访问，方便快速区分“代码问题”还是“配置问题”。
+5. 已确认当前本地 `.env.local` 的真实阻塞点是 Supabase Auth URL 不可达
+   诊断结果显示：`DATABASE_URL` 与 `DIRECT_URL` 的 pooler 域名可以解析，但 `NEXT_PUBLIC_SUPABASE_URL` 对应的 Supabase Auth 域名无法解析，因此当前真实登录 smoke test 被环境配置阻塞，而不是被本轮代码改动阻塞。
+
+### 本轮影响文件
+
+| 文件 | 作用 |
+|------|------|
+| `feldenkrais-mvp/app/layout.tsx` | 根布局显式改为动态渲染 |
+| `feldenkrais-mvp/app/practice-search/page.tsx` | 练习列表页显式改为动态渲染 |
+| `feldenkrais-mvp/app/practices/[slug]/page.tsx` | 练习详情页显式改为动态渲染，并移除构建期静态参数 |
+| `feldenkrais-mvp/server/auth/auth-error-message.ts` | 统一 Supabase / DB 网络异常文案 |
+| `feldenkrais-mvp/server/actions/auth.ts` | 学生登录/注册增加网络异常保护 |
+| `feldenkrais-mvp/server/actions/admin-auth.ts` | 老师登录增加网络异常保护 |
+| `feldenkrais-mvp/scripts/check-auth-env.ts` | 新增认证环境诊断脚本 |
+| `feldenkrais-mvp/package.json` | 新增 `auth:check` 脚本 |
+| `feldenkrais-mvp/README.md` | 补充 `auth:check` 的使用说明 |
+
+## 2026-05-01 开发日志
+
+### 上线前安全与构建修复
+
+1. Next.js 16 Proxy 入口已收口
+   删除旧的 `middleware.ts`，只保留 `proxy.ts` 作为 Supabase SSR session 刷新入口，解决生产构建报 “Both middleware file and proxy file are detected” 的阻断错误。
+2. 新增数据库权限收口 migration
+   `prisma/migrations/20260501193000_lock_down_public_table_access/migration.sql` 启用所有 public 业务表 RLS，并撤销 `anon` / `authenticated` 对这些表的直接 select / insert / update / delete 权限。当前浏览器 Supabase client 只用于 Auth，业务数据统一由服务端 Prisma 访问。
+3. 已把权限 migration 应用到当前 Supabase 数据库
+   复验结果：`user_profiles`、`feedback_sessions`、`feedback_body_part_entries`、`practices` 等业务表 `rls=true`，`anon` / `authenticated` 直接表权限均为 `false`；匿名 REST 访问这些表返回 401。
+4. 修复 `auth:check` 的 Supabase health 假阴性
+   `/auth/v1/health` 请求现在带上 public key，避免健康检查把正常的 Supabase Auth 服务误判为 401。
+5. 依赖补丁升级
+   Next 升级到 `16.2.4`，Prisma 相关包升级到 `7.8.0`，`eslint-config-next` 对齐到 `16.2.4`。`npm audit --omit=dev` 目前只剩 moderate 级别且需要破坏性 `--force` 的上游项，暂不降级 Next 或 Prisma。
+
+### 本轮影响文件
+
+| 文件 | 作用 |
+|------|------|
+| `feldenkrais-mvp/proxy.ts` | 作为唯一的 Next.js Proxy / Supabase session 刷新入口 |
+| `feldenkrais-mvp/middleware.ts` | 已删除，避免 Next 16 构建入口冲突 |
+| `feldenkrais-mvp/prisma/migrations/20260501193000_lock_down_public_table_access/migration.sql` | 启用 RLS 并撤销 public API roles 对业务表的直接权限 |
+| `feldenkrais-mvp/scripts/check-auth-env.ts` | Supabase health check 增加 apikey / Authorization header |
+| `feldenkrais-mvp/package.json` | 升级 Next / Prisma / eslint-config-next 补丁版本 |
+| `feldenkrais-mvp/package-lock.json` | 同步依赖锁定版本 |
+| `feldenkrais-mvp/README.md` | 新增上线前检查与数据库安全要求 |
+
+### 验证记录
+
+1. `npm run auth:check` 通过，Supabase DNS、数据库 DNS、Auth health 均为 OK
+2. `npm run prisma:validate` 通过
+3. `npx prisma migrate deploy` 已成功应用 `20260501193000_lock_down_public_table_access`
+4. 匿名 REST 对 public 业务表访问返回 401
+5. RLS/权限查询确认业务表 `rls=true`，`anon` / `authenticated` 无直接 CRUD 权限
+6. `npm run lint` 通过
+7. `npx tsc --noEmit` 通过
+8. `npm run build` 通过，Next.js 16.2.4 + Turbopack 可以完成生产构建
+
+## 2026-05-01 开发日志（二）
+
+### 人体图皮肤 / 骨骼视图升级
+
+1. 人体图新增图层切换
+   `BodyMap` 现在保留“正面 / 背面”切换，同时新增“皮肤 / 骨骼”切换。默认显示皮肤层，点击“骨骼”后展示骨架线条。
+2. SVG 轮廓重画
+   `BodyMapFront` 与 `BodyMapBack` 已从旧的分块几何图，改成更完整的人体轮廓：包含头颈、躯干、骨盆、腿脚，以及作为外轮廓补完的手臂和手部。
+3. 交互数据结构保持不变
+   本轮没有新增 body region code，也没有改数据库 seed。可点击区域仍沿用现有 30 个 code，因此找练习筛选、反馈多选和老师端统计不会被迁移影响。
+4. 骨骼图作为视觉层
+   骨骼线条包含头骨、脊柱、锁骨/肩胛、肋廓、骨盆和下肢骨线；点击命中区仍覆盖在对应身体部位上，选中态在两个图层中保持一致。
+
+### 本轮影响文件
+
+| 文件 | 作用 |
+|------|------|
+| `feldenkrais-mvp/app/components/body-map/BodyMap.tsx` | 新增皮肤 / 骨骼图层状态与切换控件 |
+| `feldenkrais-mvp/app/components/body-map/BodyMapFront.tsx` | 重画正面人体 SVG 与正面骨骼层 |
+| `feldenkrais-mvp/app/components/body-map/BodyMapBack.tsx` | 重画背面人体 SVG 与背面骨骼层 |
+| `feldenkrais-mvp/app/globals.css` | 新增人体图皮肤、骨骼、hover、focus 和选中态样式 |
+
+### 验证记录
+
+1. `npm run lint` 通过
+2. `npx tsc --noEmit` 通过
+
+## 2026-05-02 开发日志
+
+### 人体图视觉修正
+
+1. 手臂比例已收短
+   正面与背面外轮廓里的手臂、手部不再垂到过低位置，改成更接近自然站姿的短臂和小手轮廓。
+2. 骨骼层去掉黑重感
+   骨骼线条从深灰改为浅暖灰，头骨填充改为暖白，选中态也改成暖棕色，不再出现黑色块状视觉。
+3. 骨骼层不再拦截点击
+   `.body-map-skeleton` 增加 `pointer-events: none`，点击会落到实际身体部位命中区，避免“骨骼图点不开”的交互错觉。
+
+### 本轮影响文件
+
+| 文件 | 作用 |
+|------|------|
+| `feldenkrais-mvp/app/components/body-map/BodyMapFront.tsx` | 收短正面手臂轮廓与正面骨骼手臂线 |
+| `feldenkrais-mvp/app/components/body-map/BodyMapBack.tsx` | 收短背面手臂轮廓与背面骨骼手臂线 |
+| `feldenkrais-mvp/app/globals.css` | 调整骨骼/皮肤/选中颜色，并让骨骼层不拦截点击 |
+
+### 验证记录
+
+1. `npm run lint` 通过
+2. `npx tsc --noEmit` 通过

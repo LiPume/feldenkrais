@@ -18,18 +18,21 @@ export default function FeedbackSessionList({
   showStudentLink = false,
   emptyHref = '/feedback/new',
   emptyTitle = '暂无反馈记录',
-  emptyDescription = '做完练习后，可以来这里查看每个身体部位的独立反馈。',
-  emptyActionLabel = '开始记录第一条',
+  emptyDescription = '做完练习后来这里查看记录。慢慢来，注意感受每一个部位。',
+  emptyActionLabel = '开始记录',
 }: Props) {
   if (sessions.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-stone-200 p-12 text-center">
-        <p className="text-stone-700 text-base mb-2">{emptyTitle}</p>
-        <p className="text-stone-400 text-sm mb-5">{emptyDescription}</p>
-        <Link
-          href={emptyHref}
-          className="inline-block px-6 py-3 bg-stone-900 text-white text-sm font-medium rounded-xl hover:bg-stone-700 transition-colors"
-        >
+      <div className="session-list-empty card">
+        <div className="session-list-empty-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 12l2 2 4-4"/>
+            <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+          </svg>
+        </div>
+        <h3 className="session-list-empty-title">{emptyTitle}</h3>
+        <p className="session-list-empty-desc">{emptyDescription}</p>
+        <Link href={emptyHref} className="btn-primary session-list-empty-btn">
           {emptyActionLabel}
         </Link>
       </div>
@@ -37,7 +40,7 @@ export default function FeedbackSessionList({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="session-list stagger-children">
       {sessions.map((session) => (
         <FeedbackSessionCard
           key={session.id}

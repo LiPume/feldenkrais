@@ -1,6 +1,6 @@
 import type { User } from '@supabase/supabase-js';
 import { hasPublicSupabaseEnv } from '@/lib/env/public';
-import { hasDatabaseEnv } from '@/server/env';
+import { hasRuntimeDatabaseEnv } from '@/server/env';
 import { ensureProfileForUser } from '@/server/auth/ensure-profile';
 import { createSupabaseServerClient } from '@/server/auth/supabase-server';
 
@@ -21,7 +21,7 @@ export async function getOptionalAuthContext(): Promise<OptionalAuthContext | nu
     return null;
   }
 
-  const profile = hasDatabaseEnv()
+  const profile = hasRuntimeDatabaseEnv()
     ? await ensureProfileForUser(data.user)
     : null;
 

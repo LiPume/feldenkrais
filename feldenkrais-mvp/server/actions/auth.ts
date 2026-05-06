@@ -1,6 +1,4 @@
 'use server';
-
-import { UserRole } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -8,9 +6,11 @@ import {
   buildStudentAuthEmail,
   normalizeStudentId,
 } from '@/lib/auth/student-account';
+import { getPostAuthPath } from '@/lib/auth/role-routing';
 import { hasPublicSupabaseEnv } from '@/lib/env/public';
-import { hasDatabaseEnv, hasSupabaseServiceRoleKey } from '@/server/env';
+import { hasRuntimeDatabaseEnv, hasSupabaseServiceRoleKey } from '@/server/env';
 import { createSupabaseAdminClient } from '@/server/auth/supabase-admin';
+import { toAuthErrorMessage } from '@/server/auth/auth-error-message';
 import { ensureProfileForUser } from '@/server/auth/ensure-profile';
 import { getPrismaClient } from '@/server/db/prisma';
 import { createSupabaseServerClient } from '@/server/auth/supabase-server';
@@ -64,18 +64,12 @@ const authFormSchema = z.object({
       message: data.mode === 'sign-up' ? '学生注册时请填写学号。' : '学生登录时请输入学号。',
     });
   }
-
-  if (data.role === 'teacher' && !data.email) {
-    context.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['email'],
-      message: '老师请使用邮箱登录或注册。',
-    });
-  }
 });
 
 export type AuthFormState = {
   error?: string;
+  mode?: 'sign-in' | 'sign-up';
+  success?: boolean;
   successMessage?: string;
 };
 
@@ -91,21 +85,7 @@ async function resolveAuthEmail(input: {
 
   const normalizedStudentId = normalizeStudentId(input.studentId!);
 
-  if (input.mode === 'sign-up') {
-    return buildStudentAuthEmail(normalizedStudentId);
-  }
-
-  const prisma = getPrismaClient();
-  const existingStudent = await prisma.userProfile.findUnique({
-    where: {
-      studentId: normalizedStudentId,
-    },
-    select: {
-      email: true,
-    },
-  });
-
-  return existingStudent?.email ?? input.email ?? buildStudentAuthEmail(normalizedStudentId);
+  return buildStudentAuthEmail(normalizedStudentId);
 }
 
 async function upsertStudentAuthUser(input: {
@@ -140,6 +120,9 @@ async function upsertStudentAuthUser(input: {
         student_id: normalizedStudentId,
         ...(input.fullName ? { full_name: input.fullName } : {}),
       },
+      app_metadata: {
+        role: 'student',
+      },
     });
 
     if (updateResult.error) {
@@ -158,6 +141,9 @@ async function upsertStudentAuthUser(input: {
       student_id: normalizedStudentId,
       ...(input.fullName ? { full_name: input.fullName } : {}),
     },
+    app_metadata: {
+      role: 'student',
+    },
   });
 
   if (createResult.error) {
@@ -171,15 +157,22 @@ export async function authenticateWithPassword(
   _previousState: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
+  const submittedMode =
+    formData.get('mode') === 'sign-up'
+      ? 'sign-up'
+      : 'sign-in';
+
   if (!hasPublicSupabaseEnv()) {
     return {
-      error: '请先配置 NEXT_PUBLIC_SUPABASE_URL 和 NEXT_PUBLIC_SUPABASE_ANON_KEY。',
+      mode: submittedMode,
+      error: '请先配置 NEXT_PUBLIC_SUPABASE_URL，以及 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY 或 NEXT_PUBLIC_SUPABASE_ANON_KEY。',
     };
   }
 
-  if (!hasDatabaseEnv()) {
+  if (!hasRuntimeDatabaseEnv()) {
     return {
-      error: '请先配置 DATABASE_URL 和 DIRECT_URL。',
+      mode: submittedMode,
+      error: '请先配置 DATABASE_URL。',
     };
   }
 
@@ -194,6 +187,7 @@ export async function authenticateWithPassword(
 
   if (!parsed.success) {
     return {
+      mode: submittedMode,
       error: parsed.error.issues[0]?.message ?? '登录信息不完整。',
     };
   }
@@ -224,30 +218,43 @@ export async function authenticateWithPassword(
       });
     } catch (error) {
       return {
-        error: error instanceof Error ? error.message : '学生账号创建失败，请稍后再试。',
+        mode,
+        error: toAuthErrorMessage(error, '学生账号创建失败，请稍后再试。'),
       };
     }
+
+    return {
+      mode,
+      success: true,
+      successMessage: `账号创建成功！学号 ${normalizedStudentId} 已注册，请点击上方「登录」按钮登录。`,
+    };
   }
 
-  const authResult =
-    mode === 'sign-in'
-      ? await supabase.auth.signInWithPassword({ email: authEmail, password })
-      : role === 'teacher'
-        ? await supabase.auth.signUp({
-          email: authEmail,
-          password,
-          options: {
-            data: {
-              role,
-              ...(fullName ? { full_name: fullName } : {}),
-              ...(normalizedStudentId ? { student_id: normalizedStudentId } : {}),
-            },
-          },
-          })
+  // 硬拦截：禁止通过公开注册创建老师账号
+  if (mode === 'sign-up' && role === 'teacher') {
+    return {
+      mode,
+      error: '老师账号不支持公开注册。请联系管理员开通账号。',
+    };
+  }
+
+  let authResult;
+
+  try {
+    authResult =
+      mode === 'sign-in'
+        ? await supabase.auth.signInWithPassword({ email: authEmail, password })
         : await supabase.auth.signInWithPassword({ email: authEmail, password });
+  } catch (error) {
+    return {
+      mode,
+      error: toAuthErrorMessage(error, '登录请求失败，请稍后再试。'),
+    };
+  }
 
   if (authResult.error) {
     return {
+      mode,
       error: authResult.error.message,
     };
   }
@@ -256,20 +263,31 @@ export async function authenticateWithPassword(
 
   if (!user) {
     return {
+      mode,
       error: '认证完成后未获取到用户信息，请稍后再试。',
     };
   }
 
   if (mode === 'sign-in' && (fullName || studentId)) {
-    const updateProfileResult = await supabase.auth.updateUser({
-      data: {
-        ...(fullName ? { full_name: fullName } : {}),
-        ...(normalizedStudentId ? { student_id: normalizedStudentId } : {}),
-      },
-    });
+    let updateProfileResult;
+
+    try {
+      updateProfileResult = await supabase.auth.updateUser({
+        data: {
+          ...(fullName ? { full_name: fullName } : {}),
+          ...(normalizedStudentId ? { student_id: normalizedStudentId } : {}),
+        },
+      });
+    } catch (error) {
+      return {
+        mode,
+        error: toAuthErrorMessage(error, '账号资料更新失败，请稍后再试。'),
+      };
+    }
 
     if (updateProfileResult.error) {
       return {
+        mode,
         error: updateProfileResult.error.message,
       };
     }
@@ -277,22 +295,29 @@ export async function authenticateWithPassword(
     user = updateProfileResult.data.user ?? user;
   }
 
-  const profile = await ensureProfileForUser(user);
+  let profile;
 
-  if (mode === 'sign-up' && role === 'teacher' && !authResult.data.session) {
+  try {
+    profile = await ensureProfileForUser(user);
+  } catch (error) {
     return {
-      successMessage: '注册成功。请先完成邮箱确认，然后再登录。',
+      mode,
+      error: toAuthErrorMessage(error, '认证成功，但同步账号资料失败，请稍后再试。'),
     };
   }
 
   revalidatePath('/', 'layout');
-  redirect(profile.role === UserRole.TEACHER ? '/teacher' : '/feedback');
+  redirect(getPostAuthPath(profile.role));
 }
 
 export async function signOut() {
   if (hasPublicSupabaseEnv()) {
-    const supabase = await createSupabaseServerClient();
-    await supabase.auth.signOut();
+    try {
+      const supabase = await createSupabaseServerClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Best effort sign-out. We still redirect so the UI can recover.
+    }
   }
 
   revalidatePath('/', 'layout');

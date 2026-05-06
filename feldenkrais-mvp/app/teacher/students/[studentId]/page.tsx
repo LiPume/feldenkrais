@@ -1,3 +1,6 @@
+// 必须动态渲染：数据库查询 + 角色鉴权
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 import { UserRole } from '@prisma/client';
 import { notFound } from 'next/navigation';

@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation';
 import { hasPublicSupabaseEnv } from '@/lib/env/public';
-import { hasDatabaseEnv } from '@/server/env';
+import { hasRuntimeDatabaseEnv } from '@/server/env';
 import { ensureProfileForUser } from '@/server/auth/ensure-profile';
 import { createSupabaseServerClient } from '@/server/auth/supabase-server';
 
 export async function requireUser() {
-  if (!hasPublicSupabaseEnv() || !hasDatabaseEnv()) {
+  if (!hasPublicSupabaseEnv() || !hasRuntimeDatabaseEnv()) {
     redirect('/login');
   }
 

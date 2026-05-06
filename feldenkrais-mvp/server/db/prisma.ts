@@ -1,18 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { getDatabaseEnv } from '@/server/env';
+import { getRuntimeDatabaseUrl } from '@/server/env';
 
 const globalForPrisma = globalThis as typeof globalThis & {
   prisma?: PrismaClient;
+  prismaUrl?: string;
 };
 
-function createPrismaClient() {
-  const { databaseUrl, directUrl } = getDatabaseEnv();
-  const runtimeUrl =
-    process.env.NODE_ENV === 'development'
-      ? directUrl
-      : databaseUrl;
-  const adapter = new PrismaPg(runtimeUrl);
+function createPrismaClient(connectionString: string) {
+  const adapter = new PrismaPg(connectionString);
 
   return new PrismaClient({
     adapter,
@@ -21,8 +17,11 @@ function createPrismaClient() {
 }
 
 export function getPrismaClient(): PrismaClient {
-  if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = createPrismaClient();
+  const databaseUrl = getRuntimeDatabaseUrl();
+
+  if (!globalForPrisma.prisma || globalForPrisma.prismaUrl !== databaseUrl) {
+    globalForPrisma.prisma = createPrismaClient(databaseUrl);
+    globalForPrisma.prismaUrl = databaseUrl;
   }
 
   return globalForPrisma.prisma;

@@ -15,6 +15,13 @@ import {
   getFeedbackSessionsByStudentProfileId,
 } from '@/server/queries/feedback';
 
+export type TeacherDashboardPagination = {
+  page?: number;
+  pageSize?: number;
+};
+
+export const DEFAULT_STUDENT_PAGE_SIZE = 20;
+
 function sortBodyRegionStats(
   stats: TeacherDashboardData['bodyRegionStats'],
 ) {
@@ -43,8 +50,12 @@ function hasWhereConditions(where: Prisma.FeedbackSessionWhereInput): boolean {
 
 export async function getTeacherDashboardData(
   filters: TeacherFeedbackFilters = {},
-): Promise<TeacherDashboardData> {
+  pagination: TeacherDashboardPagination = {},
+): Promise<TeacherDashboardData & { pagination: { page: number; pageSize: number; totalCount: number; hasMore: boolean } }> {
   const prisma = getPrismaClient();
+  const page = Math.max(1, pagination.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, pagination.pageSize ?? DEFAULT_STUDENT_PAGE_SIZE));
+  const skip = (page - 1) * pageSize;
   const sessionWhere = buildFeedbackSessionWhereInput(
     mapTeacherFiltersToSessionFilters(filters),
   );
@@ -68,6 +79,7 @@ export async function getTeacherDashboardData(
     : undefined;
   const [
     totalFeedbackSessions,
+    totalStudentCount,
     practiceGroups,
     bodyRegionGroups,
     labelGroups,
@@ -77,6 +89,11 @@ export async function getTeacherDashboardData(
     await Promise.all([
       prisma.feedbackSession.count({
         where: sessionWhere,
+      }),
+      prisma.userProfile.count({
+        where: {
+          role: UserRole.STUDENT,
+        },
       }),
       prisma.feedbackSession.groupBy({
         by: ['practiceId'],
@@ -124,6 +141,12 @@ export async function getTeacherDashboardData(
           studentId: true,
           email: true,
         },
+        orderBy: [
+          { studentId: 'asc' },
+          { fullName: 'asc' },
+        ],
+        skip,
+        take: pageSize,
       }),
     ]);
 
@@ -207,24 +230,14 @@ export async function getTeacherDashboardData(
         hasSubmitted: (studentGroup?.feedbackCount ?? 0) > 0,
         lastFeedbackDate: studentGroup?.lastFeedbackDate,
       };
-    })
-    .sort((left, right) => {
-      const leftStudentId = left.studentId ?? '';
-      const rightStudentId = right.studentId ?? '';
-
-      if (leftStudentId !== rightStudentId) {
-        return leftStudentId.localeCompare(rightStudentId);
-      }
-
-      return left.studentName.localeCompare(right.studentName);
     });
   const submittedStudentCount = studentSummaries.filter((item) => item.hasSubmitted).length;
 
   return {
     totalFeedbackSessions,
-    registeredStudentCount: studentProfiles.length,
+    registeredStudentCount: totalStudentCount,
     submittedStudentCount,
-    missingStudentCount: studentProfiles.length - submittedStudentCount,
+    missingStudentCount: totalStudentCount - submittedStudentCount,
     practiceStats: practiceGroups
       .map((group) => {
         if (!group.practiceId) {
@@ -272,6 +285,12 @@ export async function getTeacherDashboardData(
       .filter((group) => group !== null)
       .sort((left, right) => right.count - left.count),
     studentSummaries,
+    pagination: {
+      page,
+      pageSize,
+      totalCount: totalStudentCount,
+      hasMore: page * pageSize < totalStudentCount,
+    },
   };
 }
 

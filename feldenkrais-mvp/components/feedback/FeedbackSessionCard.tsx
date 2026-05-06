@@ -17,90 +17,83 @@ export default function FeedbackSessionCard({
   showStudent = false,
   showStudentLink = false,
 }: Props) {
-  const studentLabel = `学生：${session.studentName}${session.studentId ? ` · ${session.studentId}` : ''}${session.studentEmail ? ` · ${session.studentEmail}` : ''}`;
+  const studentLabel = `${session.studentName}${session.studentId ? ` · ${session.studentId}` : ''}${session.studentEmail ? ` · ${session.studentEmail}` : ''}`;
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 p-5">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div>
+    <div className="session-card card">
+      {/* Card header */}
+      <div className="session-card-header">
+        <div className="session-card-meta">
           {session.practiceTitle ? (
             session.practiceSlug ? (
               <Link
                 href={`/practices/${session.practiceSlug}`}
-                className="text-base font-medium text-stone-900 hover:text-stone-700 transition-colors"
+                className="session-card-title"
               >
                 {session.practiceTitle}
               </Link>
             ) : (
-              <span className="text-base font-medium text-stone-900">
-                {session.practiceTitle}
-              </span>
+              <span className="session-card-title session-card-title--dim">{session.practiceTitle}</span>
             )
           ) : (
-            <span className="text-base font-medium text-stone-400">未关联练习</span>
+            <span className="session-card-title session-card-title--dim">未关联练习</span>
           )}
 
           {showStudent && (
             showStudentLink ? (
               <Link
                 href={`/teacher/students/${session.studentProfileId}`}
-                className="inline-flex mt-1 text-sm text-stone-500 hover:text-stone-800 transition-colors"
+                className="session-card-student"
               >
                 {studentLabel}
               </Link>
             ) : (
-              <p className="text-sm text-stone-500 mt-1">
-                {studentLabel}
-              </p>
+              <p className="session-card-student">{studentLabel}</p>
             )
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <span
-            className={`inline-block px-2 py-0.5 text-xs rounded-full ${
-              session.feedbackPhase === 'before'
-                ? 'bg-stone-100 text-stone-600'
-                : 'bg-stone-800 text-white'
-            }`}
-          >
+        <div className="session-card-tags">
+          <span className={`session-phase-tag ${session.feedbackPhase === 'before' ? 'session-phase-tag--before' : 'session-phase-tag--after'}`}>
             {FEEDBACK_PHASE_NAME_MAP[session.feedbackPhase]}
           </span>
-          <span className="text-xs text-stone-400">
-            {formatMonthDayLabel(session.feedbackDate)}
-          </span>
+          <span className="session-date">{formatMonthDayLabel(session.feedbackDate)}</span>
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3">
+      {/* Entries */}
+      <div className="session-entries">
         {session.entries.map((entry) => (
-          <div key={entry.id} className="rounded-xl border border-stone-200 bg-stone-50 p-4">
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-sm font-medium text-stone-900">{entry.bodyRegionName}</span>
-              <span className="text-xs text-stone-500">强度 {entry.intensityScore}/10</span>
+          <div key={entry.id} className="session-entry">
+            <div className="session-entry-header">
+              <div className="session-entry-region">
+                <span className="session-entry-dot" />
+                {entry.bodyRegionName}
+              </div>
+              <span className="session-entry-intensity">
+                强度 {entry.intensityScore}
+                <span className="session-entry-intensity-max">/10</span>
+              </span>
             </div>
 
-            <div className="mt-2 flex flex-wrap gap-1">
-              {entry.labelNames.length > 0 ? (
-                entry.labelNames.map((labelName) => (
-                  <span
-                    key={`${entry.id}-${labelName}`}
-                    className="inline-flex rounded-full bg-white px-2 py-0.5 text-xs text-stone-600 border border-stone-200"
-                  >
-                    {labelName}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-stone-400">未选标签</span>
-              )}
-            </div>
-
-            <p className="mt-2 text-xs text-stone-500">
-              左右差异：{LEFT_RIGHT_NAME_MAP[entry.leftRightDiff]}
-            </p>
-
-            {entry.note && (
-              <p className="mt-2 text-sm text-stone-600 leading-relaxed">{entry.note}</p>
+            {(entry.labelNames.length > 0 || entry.note) && (
+              <div className="session-entry-details">
+                {entry.labelNames.length > 0 && (
+                  <div className="session-entry-labels">
+                    {entry.labelNames.map((labelName) => (
+                      <span key={`${entry.id}-${labelName}`} className="session-entry-label">
+                        {labelName}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {entry.note && (
+                  <p className="session-entry-note">{entry.note}</p>
+                )}
+                {entry.leftRightDiff !== 'none' && (
+                  <p className="session-entry-diff">左右差异：{LEFT_RIGHT_NAME_MAP[entry.leftRightDiff]}</p>
+                )}
+              </div>
             )}
           </div>
         ))}

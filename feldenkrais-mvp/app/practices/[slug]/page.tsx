@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getRegionByCode } from '../../lib/body-region-constants';
-import { getPublishedPracticeBySlug, getPublishedPractices } from '@/server/queries/practices';
+import { getRegionByCode } from '@/lib/constants/body-regions';
+import { getPublishedPracticeBySlug } from '@/server/queries/practices';
+
+export const dynamic = 'force-dynamic';
 
 // 辅助函数：将秒数格式化为 mm:ss
 function formatDuration(sec: number): string {
@@ -13,11 +15,6 @@ function formatDuration(sec: number): string {
 type Props = {
   params: Promise<{ slug: string }>;
 };
-
-export async function generateStaticParams() {
-  const practices = await getPublishedPractices();
-  return practices.map((practice) => ({ slug: practice.slug }));
-}
 
 export default async function PracticeDetailPage({ params }: Props) {
   const { slug } = await params;

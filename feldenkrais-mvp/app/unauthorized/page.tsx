@@ -1,32 +1,67 @@
+import { UserRole } from '@prisma/client';
 import Link from 'next/link';
+import {
+  getRoleLabel,
+  getUnauthorizedState,
+  parseRoleListParam,
+} from '@/lib/auth/role-routing';
+import { getOptionalAuthContext } from '@/server/auth/get-optional-user';
 
-export default function UnauthorizedPage() {
+type Props = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function UnauthorizedPage({ searchParams }: Props) {
+  const auth = await getOptionalAuthContext();
+  const params = await searchParams;
+  const expected = parseRoleListParam(
+    Array.isArray(params.expected) ? params.expected[0] : params.expected,
+  );
+  const state = getUnauthorizedState({
+    actualRole: auth?.profile?.role ?? null,
+    expectedRoles: expected,
+  });
+  const currentRoleLabel =
+    auth?.profile?.role ? getRoleLabel(auth.profile.role) : null;
+
   return (
-    <div className="max-w-xl mx-auto px-6 py-16 text-center">
-      <h1 className="text-2xl font-medium text-stone-900 mb-3">没有访问权限</h1>
-      <p className="text-sm text-stone-500 mb-6">
-        当前账号已登录，但没有打开这个页面所需的角色权限。
-        老师端需要老师角色账号。
-      </p>
-      <div className="flex flex-col sm:flex-row justify-center gap-3">
-        <Link
-          href="/"
-          className="px-5 py-3 rounded-xl bg-stone-900 text-white text-sm font-medium"
-        >
-          返回首页
-        </Link>
-        <Link
-          href="/feedback"
-          className="px-5 py-3 rounded-xl border border-stone-300 bg-white text-stone-800 text-sm font-medium"
-        >
-          去我的反馈
-        </Link>
-        <Link
-          href="/login"
-          className="px-5 py-3 rounded-xl border border-stone-300 bg-white text-stone-800 text-sm font-medium"
-        >
-          换老师账号登录
-        </Link>
+    <div className="unauthorized-page">
+      <div className="unauthorized-card card">
+        <div className="unauthorized-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h1 className="unauthorized-title">{state.title}</h1>
+        <p className="unauthorized-desc">{state.description}</p>
+
+        {currentRoleLabel && (
+          <div className="unauthorized-role">
+            <span className="unauthorized-role-label">当前账号</span>
+            <span className="unauthorized-role-value">{currentRoleLabel}</span>
+          </div>
+        )}
+
+        <div className="unauthorized-actions">
+          <Link href={state.primaryAction.href} className="btn-primary">
+            {state.primaryAction.label}
+          </Link>
+          {state.secondaryActions.map((action) => (
+            <Link
+              key={action.href}
+              href={action.href}
+              className="btn-secondary"
+            >
+              {action.label}
+            </Link>
+          ))}
+          {auth?.profile?.role === UserRole.STUDENT && expected.includes(UserRole.TEACHER) && (
+            <Link href="/admin/login" className="btn-secondary">
+              换后台账号登录
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );
