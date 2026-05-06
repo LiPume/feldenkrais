@@ -73,6 +73,12 @@ export type AuthFormState = {
   successMessage?: string;
 };
 
+function getMetadataString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim()
+    ? value.trim()
+    : undefined;
+}
+
 async function resolveAuthEmail(input: {
   mode: 'sign-in' | 'sign-up';
   role: 'student' | 'teacher';
@@ -200,6 +206,15 @@ export async function authenticateWithPassword(
     fullName,
     studentId,
   } = parsed.data;
+
+  // 硬拦截：禁止通过公开注册创建老师账号
+  if (mode === 'sign-up' && role === 'teacher') {
+    return {
+      mode,
+      error: '老师账号不支持公开注册。请联系管理员开通账号。',
+    };
+  }
+
   const authEmail = await resolveAuthEmail({
     mode,
     role,
@@ -223,28 +238,46 @@ export async function authenticateWithPassword(
       };
     }
 
-    return {
-      mode,
-      success: true,
-      successMessage: `账号创建成功！学号 ${normalizedStudentId} 已注册，请点击上方「登录」按钮登录。`,
-    };
-  }
+    let signUpAuthResult;
 
-  // 硬拦截：禁止通过公开注册创建老师账号
-  if (mode === 'sign-up' && role === 'teacher') {
-    return {
-      mode,
-      error: '老师账号不支持公开注册。请联系管理员开通账号。',
-    };
+    try {
+      signUpAuthResult = await supabase.auth.signInWithPassword({
+        email: authEmail,
+        password,
+      });
+    } catch (error) {
+      return {
+        mode,
+        error: toAuthErrorMessage(error, '账号已创建，但自动登录失败，请返回登录页重新登录。'),
+      };
+    }
+
+    if (signUpAuthResult.error || !signUpAuthResult.data.user) {
+      return {
+        mode,
+        error: '账号已创建，但自动登录失败，请返回登录页重新登录。',
+      };
+    }
+
+    let profile;
+
+    try {
+      profile = await ensureProfileForUser(signUpAuthResult.data.user);
+    } catch (error) {
+      return {
+        mode,
+        error: toAuthErrorMessage(error, '账号已创建，但同步账号资料失败，请返回登录页重新登录。'),
+      };
+    }
+
+    revalidatePath('/', 'layout');
+    redirect(getPostAuthPath(profile.role));
   }
 
   let authResult;
 
   try {
-    authResult =
-      mode === 'sign-in'
-        ? await supabase.auth.signInWithPassword({ email: authEmail, password })
-        : await supabase.auth.signInWithPassword({ email: authEmail, password });
+    authResult = await supabase.auth.signInWithPassword({ email: authEmail, password });
   } catch (error) {
     return {
       mode,
@@ -268,7 +301,16 @@ export async function authenticateWithPassword(
     };
   }
 
-  if (mode === 'sign-in' && (fullName || studentId)) {
+  const currentFullName = getMetadataString(user.user_metadata?.full_name);
+  const currentStudentId = getMetadataString(user.user_metadata?.student_id);
+  const shouldUpdateStudentMetadata =
+    role === 'student'
+    && (
+      (normalizedStudentId && currentStudentId !== normalizedStudentId)
+      || (fullName && currentFullName !== fullName)
+    );
+
+  if (shouldUpdateStudentMetadata) {
     let updateProfileResult;
 
     try {

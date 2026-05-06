@@ -60,14 +60,25 @@ export async function ensureProfileForUser(user: User): Promise<UserProfile> {
   });
 
   if (existing) {
+    const nextProfile = {
+      email,
+      fullName: fullName ?? existing.fullName,
+      studentId: studentId ?? existing.studentId,
+      role: metadataRole ?? existing.role,
+    };
+
+    if (
+      existing.email === nextProfile.email
+      && existing.fullName === nextProfile.fullName
+      && existing.studentId === nextProfile.studentId
+      && existing.role === nextProfile.role
+    ) {
+      return existing;
+    }
+
     return prisma.userProfile.update({
       where: { id: user.id },
-      data: {
-        email,
-        fullName: fullName ?? existing.fullName,
-        studentId: studentId ?? existing.studentId,
-        role: metadataRole ?? existing.role,
-      },
+      data: nextProfile,
     });
   }
 
