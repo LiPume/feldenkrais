@@ -2,9 +2,15 @@
 
 import { useActionState, useEffect, useState, type FormEvent } from 'react';
 import { authenticateWithPassword, type AuthFormState } from '@/server/actions/auth';
+import Alert from '@/components/ui/Alert';
+import Button from '@/components/ui/Button';
+import FormField from '@/components/ui/FormField';
 
 const initialState: AuthFormState = {};
 type AuthIntent = 'sign-in' | 'sign-up';
+
+const inputClassName =
+  'min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3.5 text-sm text-stone-950 shadow-sm transition-colors placeholder:text-stone-400 focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200';
 
 export default function LoginForm() {
   const [mode, setMode] = useState<AuthIntent>('sign-in');
@@ -42,101 +48,86 @@ export default function LoginForm() {
   };
 
   return (
-    <form action={action} className="login-form" onSubmit={handleSubmit}>
+    <form action={action} className="space-y-5" onSubmit={handleSubmit}>
       {pending ? (
-        <div className="form-alert form-alert--success">
-          <span className="login-spinner" />
-          {pendingMessage}
-        </div>
+        <Alert variant="info">{pendingMessage}</Alert>
       ) : visibleState?.success ? (
-        <div className="form-alert form-alert--success">
+        <Alert variant="success">
           {visibleState.successMessage ?? '账号已创建，正在进入系统...'}
-        </div>
+        </Alert>
       ) : visibleState?.error ? (
-        <div className="form-alert form-alert--error">{visibleState.error}</div>
+        <Alert variant="error">{visibleState.error}</Alert>
       ) : (
-        <div className="form-alert form-alert--success">
-          输入学号和密码后，可以直接登录；新账号会在注册后自动进入系统。
-        </div>
+        <Alert variant="info">
+          输入学号和密码后可以直接登录；新账号会在注册后自动进入系统。
+        </Alert>
       )}
 
-      <div className="form-group">
-        <label htmlFor="fullName" className="form-label">姓名</label>
+      <FormField
+        htmlFor="fullName"
+        label="姓名"
+        description="注册时填写真实姓名；老账号也可在登录时补填。"
+      >
         <input
           id="fullName"
           name="fullName"
           type="text"
           autoComplete="name"
           placeholder="张三"
-          className="input-field"
+          className={inputClassName}
         />
-        <p className="form-hint">注册时填写真实姓名；老账号也可在登录时补填</p>
-      </div>
+      </FormField>
 
       <input type="hidden" name="role" value="student" />
 
-      <div className="form-group">
-        <label htmlFor="studentId" className="form-label">
-          学号 <span className="form-required">*</span>
-        </label>
+      <FormField htmlFor="studentId" label="学号">
         <input
           id="studentId"
           name="studentId"
           type="text"
           autoComplete="username"
           placeholder="20240001"
-          className="input-field"
+          className={inputClassName}
           required
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="password" className="form-label">
-          密码 <span className="form-required">*</span>
-        </label>
+      <FormField htmlFor="password" label="密码">
         <input
           id="password"
           name="password"
           type="password"
           autoComplete="current-password"
           placeholder="至少 6 位"
-          className="input-field"
+          className={inputClassName}
           required
           minLength={6}
         />
-      </div>
+      </FormField>
 
-      <div className="form-actions">
-        <button
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Button
           type="submit"
           name="mode"
           value="sign-in"
           disabled={pending}
-          className={`btn-primary login-submit ${mode === 'sign-in' ? '' : 'btn-secondary--ghost'}`}
+          loading={pending && pendingIntent === 'sign-in'}
+          variant={mode === 'sign-in' ? 'primary' : 'secondary'}
           onClick={() => setMode('sign-in')}
         >
-          {pending && pendingIntent === 'sign-in' ? (
-            <>
-              <span className="login-spinner" />
-              正在登录...
-            </>
-          ) : '登录'}
-        </button>
-        <button
+          {pending && pendingIntent === 'sign-in' ? '正在登录...' : '登录'}
+        </Button>
+        <Button
           type="submit"
           name="mode"
           value="sign-up"
           disabled={pending}
-          className={`btn-secondary login-submit ${mode === 'sign-up' ? '' : 'btn-secondary--ghost'}`}
+          loading={pending && pendingIntent === 'sign-up'}
+          variant={mode === 'sign-up' ? 'primary' : 'secondary'}
           onClick={() => setMode('sign-up')}
         >
-          {pending && pendingIntent === 'sign-up' ? (
-            <>
-              <span className="login-spinner" />
-              正在创建账号...
-            </>
-          ) : '注册'}
-        </button>
+          {pending && pendingIntent === 'sign-up' ? '正在创建账号...' : '注册'}
+        </Button>
       </div>
     </form>
   );

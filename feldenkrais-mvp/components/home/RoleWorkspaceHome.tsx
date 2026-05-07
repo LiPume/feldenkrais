@@ -1,5 +1,7 @@
 import { UserRole } from '@prisma/client';
 import Link from 'next/link';
+import Badge from '@/components/ui/Badge';
+import { Card, CardContent } from '@/components/ui/Card';
 
 type Props = {
   role: UserRole;
@@ -8,163 +10,112 @@ type Props = {
 };
 
 type ActionCard = {
-  title: string;
+  badge?: string;
   description: string;
   href: string;
+  title: string;
   tone?: 'primary' | 'secondary';
 };
 
 const studentActions: ActionCard[] = [
   {
+    badge: '今日入口',
     title: '找练习',
-    description: '按身体部位进入练习库，找到适合的练习内容与音频。',
+    description: '按身体部位进入练习库，找到适合此刻状态的练习。',
     href: '/practice-search',
     tone: 'primary',
   },
   {
     title: '新建反馈',
-    description: '记录这次练习的感受，每个部位独立填写，追踪感知变化。',
+    description: '练习前后记录身体部位、强度和感受词。',
     href: '/feedback/new',
   },
   {
     title: '我的反馈',
-    description: '回顾练习历史，在时间轴中看见自己的觉察轨迹。',
+    description: '回看历史记录，观察身体觉察的变化轨迹。',
     href: '/feedback',
   },
 ];
 
-const adminTeachingActions: ActionCard[] = [
+const adminActions: ActionCard[] = [
   {
-    title: '老师端统计',
-    description: '查看全班填写情况、练习反馈数和学生历史数据。',
+    badge: '后台',
+    title: '进入管理后台',
+    description: '查看全班反馈统计、学生填写情况和练习数据。',
     href: '/teacher',
     tone: 'primary',
   },
   {
-    title: '练习库',
-    description: '查看所有练习内容，也可以切换到个人视角使用反馈功能。',
+    title: '查看练习库',
+    description: '以学生视角检查练习内容和反馈入口。',
     href: '/practice-search',
   },
 ];
 
-const adminPersonalActions: ActionCard[] = [
-  {
-    title: '我的反馈',
-    description: '以个人身份记录体验，测试流程或记录自己的练习感受。',
-    href: '/feedback',
-    tone: 'primary',
-  },
-  {
-    title: '新建反馈',
-    description: '直接进入反馈表单，记录个人练习中的觉察与变化。',
-    href: '/feedback/new',
-  },
-];
+function WorkspaceLinkCard({ action }: { action: ActionCard }) {
+  const primary = action.tone === 'primary';
 
-function ActionGrid({ actions }: { actions: ActionCard[] }) {
   return (
-    <div className="action-grid stagger-children">
-      {actions.map((action) => (
-        <Link
-          key={action.title}
-          href={action.href}
-          className={`action-card card ${action.tone === 'primary' ? 'action-card--primary' : ''}`}
-        >
-          <div className="action-card-inner">
-            <div>
-              <h3 className="action-card-title">{action.title}</h3>
-              <p className="action-card-desc">{action.description}</p>
-            </div>
-            <div className="action-card-arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </div>
+    <Link
+      href={action.href}
+      className="group block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+    >
+      <Card
+        className={
+          primary
+            ? 'h-full border-stone-900 bg-stone-950 text-stone-50 transition-transform group-hover:-translate-y-0.5'
+            : 'h-full transition-transform group-hover:-translate-y-0.5'
+        }
+      >
+        <CardContent className="flex h-full flex-col justify-between gap-6 p-5">
+          <div>
+            {action.badge && (
+              <Badge variant={primary ? 'warm' : 'neutral'}>{action.badge}</Badge>
+            )}
+            <h3 className={primary ? 'mt-4 text-xl font-medium tracking-normal text-stone-50' : 'mt-4 text-xl font-medium tracking-normal text-stone-950'}>
+              {action.title}
+            </h3>
+            <p className={primary ? 'mt-2 text-sm leading-6 text-stone-300' : 'mt-2 text-sm leading-6 text-stone-600'}>
+              {action.description}
+            </p>
           </div>
-        </Link>
-      ))}
-    </div>
-  );
-}
-
-function WorkspaceHero({ role, userLabel, studentId }: Props) {
-  const isAdmin = role === UserRole.TEACHER;
-
-  return (
-    <section className={`workspace-hero ${isAdmin ? 'workspace-hero--admin' : ''}`}>
-      <div className="workspace-hero-bg" />
-      <div className="workspace-hero-inner">
-        <div className="workspace-hero-content animate-fade-in-up">
-          <p className="section-eyebrow workspace-hero-eyebrow">
-            {isAdmin ? '管理后台' : '学生工作台'}
-          </p>
-          <h1 className="workspace-hero-title">{userLabel}</h1>
-          {studentId && (
-            <p className="workspace-hero-student-id">学号 {studentId}</p>
-          )}
-          <p className="workspace-hero-desc">
-            {isAdmin
-              ? '查看全班练习反馈统计与学生填写情况，也可以继续以个人身份做练习和记录反馈。'
-              : '从这里开始：找练习、做反馈、回顾历史。慢慢来，感受每一个部位。'}
-          </p>
-        </div>
-      </div>
-    </section>
+          <span className={primary ? 'text-sm font-medium text-stone-100' : 'text-sm font-medium text-stone-800'}>
+            进入
+          </span>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
 
 export default function RoleWorkspaceHome({ role, userLabel, studentId }: Props) {
-  if (role === UserRole.TEACHER) {
-    return (
-      <div className="workspace-page">
-        <WorkspaceHero role={role} userLabel={userLabel} studentId={studentId} />
-
-        <div className="workspace-body">
-          <div className="workspace-section animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-            <div className="workspace-section-header">
-              <p className="section-eyebrow">管理</p>
-              <h2 className="workspace-section-title">后台入口</h2>
-              <div className="divider" />
-              <p className="workspace-section-desc">
-                查看全班与练习统计，下钻到某个学生或某个练习的详细反馈。
-              </p>
-            </div>
-            <ActionGrid actions={adminTeachingActions} />
-          </div>
-
-          <div className="workspace-section animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-            <div className="workspace-section-header">
-              <p className="section-eyebrow">个人</p>
-              <h2 className="workspace-section-title">个人使用</h2>
-              <div className="divider" />
-              <p className="workspace-section-desc">
-                以个人身份进入反馈流程，与管理入口分开，避免混淆。
-              </p>
-            </div>
-            <ActionGrid actions={adminPersonalActions} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isAdmin = role === UserRole.TEACHER;
+  const actions = isAdmin ? adminActions : studentActions;
 
   return (
-    <div className="workspace-page">
-      <WorkspaceHero role={role} userLabel={userLabel} studentId={studentId} />
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 sm:py-14">
+      <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-[0_1px_2px_rgba(28,25,23,0.04),0_18px_50px_rgba(28,25,23,0.06)] sm:p-8">
+        <Badge variant={isAdmin ? 'warm' : 'success'}>
+          {isAdmin ? '管理后台' : '学生工作台'}
+        </Badge>
+        <h1 className="mt-5 text-3xl font-medium leading-tight tracking-normal text-stone-950 sm:text-4xl">
+          {isAdmin ? '欢迎回来，进入管理视图。' : `你好，${userLabel}`}
+        </h1>
+        {studentId && (
+          <p className="mt-2 text-sm text-stone-500">学号 {studentId}</p>
+        )}
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-600 sm:text-base">
+          {isAdmin
+            ? '从这里查看全班练习反馈和学生填写情况。前端重建不会改变后台权限和数据统计逻辑。'
+            : '从一次练习开始：选择身体部位，听音频，完成后记录反馈。慢一点，感受会更清楚。'}
+        </p>
+      </section>
 
-      <div className="workspace-body">
-        <div className="workspace-section animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-          <div className="workspace-section-header">
-            <p className="section-eyebrow">常用</p>
-            <h2 className="workspace-section-title">开始练习</h2>
-            <div className="divider" />
-            <p className="workspace-section-desc">
-              三条主线入口：找练习、做反馈、回看历史。感受每个部位，关注自己的变化。
-            </p>
-          </div>
-          <ActionGrid actions={studentActions} />
-        </div>
-      </div>
+      <section className="grid gap-4 md:grid-cols-3">
+        {actions.map((action) => (
+          <WorkspaceLinkCard key={action.href} action={action} />
+        ))}
+      </section>
     </div>
   );
 }

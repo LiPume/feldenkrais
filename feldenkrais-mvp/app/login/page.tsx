@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import LoginForm from '@/components/auth/LoginForm';
+import Alert from '@/components/ui/Alert';
+import Badge from '@/components/ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { getPostAuthPath } from '@/lib/auth/role-routing';
 import { hasPublicSupabaseEnv } from '@/lib/env/public';
 import { getOptionalAuthContext } from '@/server/auth/get-optional-user';
@@ -16,62 +19,58 @@ export default async function LoginPage() {
   const envReady = hasPublicSupabaseEnv() && hasRuntimeDatabaseEnv();
 
   return (
-    <div className="login-page">
-      <div className="login-layout">
-        {/* Left panel — branding */}
-        <div className="login-panel login-panel--left">
-          <div className="login-panel-bg" />
-          <div className="login-panel-content">
-            <p className="section-eyebrow login-panel-eyebrow">身体觉察</p>
-            <h2 className="login-panel-title">
-              感知身体<br />
-              <em>觉察当下</em>
-            </h2>
-            <div className="divider" />
-            <p className="login-panel-desc">
-              费登奎斯练习与反馈记录。慢慢来，感受每一个部位，看见自己的变化。
-            </p>
-          </div>
+    <div className="mx-auto flex min-h-[calc(100dvh-8rem)] w-full max-w-5xl flex-col justify-center gap-8 px-4 py-8 sm:px-6">
+      <div className="max-w-2xl">
+        <Link
+          href="/"
+          className="text-sm font-medium text-stone-500 transition-colors hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+        >
+          返回首页
+        </Link>
+        <div className="mt-8">
+          <Badge variant="warm">学生入口</Badge>
+          <h1 className="mt-5 text-3xl font-medium leading-tight tracking-normal text-stone-950 sm:text-4xl">
+            登录或注册，继续你的身体觉察记录。
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-stone-600 sm:text-base">
+            使用学号和密码进入系统。新账号注册后会自动登录并进入学生工作台。
+          </p>
         </div>
+      </div>
 
-        {/* Right panel — form */}
-        <div className="login-panel login-panel--right">
-          <div className="login-form-wrap">
-            <Link href="/" className="login-back">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-              返回首页
-            </Link>
-
-            <div className="login-form-header">
-              <h1 className="login-form-title">登录 / 注册</h1>
-              <p className="login-form-subtitle">使用学号 + 密码登录或注册新账号</p>
-              <p className="login-env-hint">
-                老师请前往 <Link href="/admin/login">后台登录</Link>。
-              </p>
-            </div>
-
+      <div className="grid gap-5 lg:grid-cols-[1fr_24rem] lg:items-start">
+        <Card>
+          <CardHeader>
+            <CardTitle>学号登录 / 注册</CardTitle>
+            <p className="text-sm leading-6 text-stone-600">
+              老师和后台账号请使用独立后台入口。
+            </p>
+          </CardHeader>
+          <CardContent>
             {envReady ? (
               <LoginForm />
             ) : (
-              <div className="card login-env-card">
-                <p className="login-env-title">环境变量未配置</p>
-                <p className="login-env-desc">
-                  以下环境变量需要配置后才能使用登录功能：
-                </p>
-                <div className="login-env-list">
-                  <code>NEXT_PUBLIC_SUPABASE_URL</code>
-                  <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code>
-                  <code>DATABASE_URL</code>
-                </div>
-                <p className="login-env-hint">
-                  兼容旧项目也可继续使用 <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>。如需学生注册，还要额外配置 <code>SUPABASE_SERVICE_ROLE_KEY</code>。
-                </p>
-              </div>
+              <Alert variant="warning">
+                环境变量未配置。请配置 Supabase 公开变量和 DATABASE_URL 后再使用登录功能。
+              </Alert>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-[#fffaf0]">
+          <CardContent className="p-5">
+            <p className="text-sm font-medium text-stone-700">进入前的小提示</p>
+            <p className="mt-3 text-sm leading-7 text-stone-600">
+              这里记录的是练习过程中的感受，不需要追求标准答案。选择一个身体部位，慢慢完成练习，再写下当下最真实的反馈。
+            </p>
+            <Link
+              href="/admin/login"
+              className="mt-5 inline-flex text-sm font-medium text-stone-700 underline underline-offset-4 transition-colors hover:text-stone-950"
+            >
+              后台账号登录
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
