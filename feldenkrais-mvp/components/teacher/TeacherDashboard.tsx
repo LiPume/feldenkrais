@@ -3,8 +3,9 @@ import Badge from '@/components/ui/Badge';
 import EmptyState from '@/components/ui/EmptyState';
 import PageHeader from '@/components/ui/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import DonutDistributionChart from '@/components/charts/DonutDistributionChart';
+import HorizontalBarChart from '@/components/charts/HorizontalBarChart';
 import AdminMetricCard from '@/components/teacher/AdminMetricCard';
-import StatBarChart from '@/components/teacher/StatBarChart';
 import TeacherFeedbackFiltersForm from '@/components/teacher/TeacherFeedbackFiltersForm';
 import { FEEDBACK_PHASE_NAME_MAP } from '@/lib/constants/feedback-labels';
 import type { TeacherDashboardData, TeacherFeedbackFilters } from '@/types/feedback';
@@ -59,6 +60,9 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
   const pageStart = totalCount === 0 ? 0 : ((page - 1) * pageSize) + 1;
   const pageEnd = Math.min(page * pageSize, totalCount);
   const filterSummary = formatFilterSummary(filters);
+  const completionRate = data.studentSummaries.length > 0
+    ? Math.round((currentPageSubmittedCount / data.studentSummaries.length) * 100)
+    : 0;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
@@ -74,18 +78,12 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
         }
       />
 
-      <TeacherFeedbackFiltersForm
-        action="/teacher"
-        resetHref="/teacher"
-        filters={filters}
-        title="数据筛选"
-      />
-
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <AdminMetricCard
           label="反馈总数"
           value={data.totalFeedbackSessions}
           description="符合当前筛选条件的反馈会话"
+          tone="warm"
         />
         <AdminMetricCard
           label="注册学生数"
@@ -95,20 +93,24 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
         <AdminMetricCard
           label="当前页已填写"
           value={currentPageSubmittedCount}
-          description="基于下方当前学生列表页计算"
+          description={`当前页填写率 ${completionRate}%`}
+          tone="success"
         />
         <AdminMetricCard
           label="当前页未填写"
           value={currentPageMissingCount}
           description="基于下方当前学生列表页计算"
+          tone="muted"
         />
       </section>
 
-      <section className="grid gap-5 lg:grid-cols-3">
-        <StatBarChart
-          title="练习反馈数量"
-          description="反馈最多的练习，点击可查看练习详情。"
+      <section className="grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.85fr)]">
+        <HorizontalBarChart
+          title="练习反馈排行"
+          description="哪些练习收到了最多反馈，点击条目可查看练习详情。"
           emptyLabel="暂无练习反馈"
+          maxItems={8}
+          tone="amber"
           items={data.practiceStats.slice(0, 8).map((item) => ({
             label: item.practiceTitle,
             value: item.feedbackCount,
@@ -116,26 +118,38 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
           }))}
         />
 
-        <StatBarChart
-          title="身体部位热度"
-          description="学生反馈中最常出现的身体部位。"
-          emptyLabel="暂无身体部位统计"
-          items={data.bodyRegionStats.slice(0, 8).map((item) => ({
-            label: item.bodyRegionName,
-            value: item.count,
-          }))}
-        />
-
-        <StatBarChart
+        <DonutDistributionChart
           title="感受标签分布"
-          description="学生最常选择的感受标签。"
+          description="学员最常记录的身体感受。"
           emptyLabel="暂无感受标签统计"
+          maxItems={8}
           items={data.labelStats.slice(0, 8).map((item) => ({
             label: item.labelName,
             value: item.count,
           }))}
         />
       </section>
+
+      <section>
+        <HorizontalBarChart
+          title="身体部位热度"
+          description="学员反馈中最常出现的身体区域，用于判断下一轮课堂观察重点。"
+          emptyLabel="暂无身体部位统计"
+          maxItems={10}
+          tone="sage"
+          items={data.bodyRegionStats.slice(0, 10).map((item) => ({
+            label: item.bodyRegionName,
+            value: item.count,
+          }))}
+        />
+      </section>
+
+      <TeacherFeedbackFiltersForm
+        action="/teacher"
+        resetHref="/teacher"
+        filters={filters}
+        title="数据筛选"
+      />
 
       <Card>
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -178,9 +192,14 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
                       {student.feedbackCount} 条反馈
                     </span>
                   </div>
-                  <p className="text-xs text-stone-500 sm:text-right">
-                    {student.lastFeedbackDate ? `最近 ${student.lastFeedbackDate}` : '暂无最近反馈'}
-                  </p>
+                  <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
+                    <p className="text-xs text-stone-500 sm:text-right">
+                      {student.lastFeedbackDate ? `最近 ${student.lastFeedbackDate}` : '暂无最近反馈'}
+                    </p>
+                    <span className="text-sm font-medium text-stone-800">
+                      查看历史
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>
