@@ -8,7 +8,14 @@ const globalForPrisma = globalThis as typeof globalThis & {
 };
 
 function createPrismaClient(connectionString: string) {
-  const adapter = new PrismaPg(connectionString);
+  const url = new URL(connectionString);
+  const sslMode = url.searchParams.get('sslmode');
+  const isLocalDatabase = ['localhost', '127.0.0.1', '::1'].includes(url.hostname);
+  const needsSsl = !isLocalDatabase && sslMode !== 'disable';
+  const adapter = new PrismaPg({
+    connectionString,
+    ...(needsSsl ? { ssl: { rejectUnauthorized: false } } : {}),
+  });
 
   return new PrismaClient({
     adapter,
