@@ -32,7 +32,7 @@ function formatFilterSummary(filters: TeacherFeedbackFilters): string {
 }
 
 const inputClassName =
-  'min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3.5 text-sm text-stone-900 shadow-sm transition-colors focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200';
+  'min-h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3.5 text-sm text-[var(--color-text-primary)] shadow-[0_1px_0_rgba(61,48,35,0.04)] transition-colors focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[rgba(139,111,63,0.16)]';
 
 export default function TeacherFeedbackFiltersForm({
   action,
@@ -48,13 +48,13 @@ export default function TeacherFeedbackFiltersForm({
       <CardContent className="space-y-5 p-5">
         <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
           <div>
-            <h2 className="text-lg font-medium tracking-normal text-stone-950">{title}</h2>
-            <p className="mt-1 text-sm leading-6 text-stone-600">
+            <h2 className="font-[var(--font-display)] text-xl font-medium tracking-normal text-[var(--color-text-primary)]">{title}</h2>
+            <p className="mt-1 text-sm leading-7 text-[var(--color-text-secondary)]">
               用阶段和日期范围过滤当前统计结果。
             </p>
           </div>
           {summary && (
-            <span className="w-fit rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900">
+            <span className="w-fit rounded-full border border-[#dcc497] bg-[var(--color-accent-light)] px-3 py-1 text-xs font-medium text-[#6f4d1f]">
               当前筛选：{summary}
             </span>
           )}
@@ -101,7 +101,7 @@ export default function TeacherFeedbackFiltersForm({
 
           <Link
             href={resetHref}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-stone-300 bg-white px-4 text-sm font-medium text-stone-800 transition-colors hover:border-stone-400 hover:bg-stone-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--color-btn-secondary-border)] bg-[var(--color-btn-secondary-bg)] px-4 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-btn-secondary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
           >
             重置
           </Link>

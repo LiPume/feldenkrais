@@ -19,40 +19,40 @@ const principles = [
 
 export default function PublicHome() {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-10 sm:px-6 sm:py-16">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-14 px-4 py-10 sm:px-6 sm:py-16">
       <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div className="max-w-2xl">
           <Badge variant="warm">费登奎斯身体觉察</Badge>
-          <h1 className="mt-5 text-4xl font-medium leading-tight tracking-normal text-stone-950 sm:text-5xl">
+          <h1 className="mt-6 font-[var(--font-display)] text-4xl font-medium leading-tight tracking-normal text-[var(--color-text-primary)] sm:text-5xl">
             用安静的练习，重新听见身体的反馈。
           </h1>
-          <p className="mt-5 text-base leading-8 text-stone-600 sm:text-lg">
+          <p className="mt-6 text-base leading-8 text-[var(--color-text-secondary)] sm:text-lg">
             按身体部位查找练习，跟随音频慢慢探索，再把练习前后的感受记录下来。这里不是打卡工具，而是一处稳定的觉察空间。
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/practice-search"
-              className="inline-flex min-h-12 items-center justify-center rounded-lg border border-stone-950 bg-stone-950 px-5 text-base font-medium text-stone-50 transition-colors hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--color-btn-primary)] bg-[var(--color-btn-primary)] px-5 text-base font-medium text-[var(--color-text-inverse)] shadow-[0_8px_20px_rgba(61,48,35,0.16)] transition-colors hover:bg-[var(--color-btn-primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             >
               开始找练习
             </Link>
             <Link
               href="/login"
-              className="inline-flex min-h-12 items-center justify-center rounded-lg border border-stone-300 bg-white px-5 text-base font-medium text-stone-800 transition-colors hover:border-stone-400 hover:bg-stone-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--color-btn-secondary-border)] bg-[var(--color-btn-secondary-bg)] px-5 text-base font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-btn-secondary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
             >
               登录 / 注册
             </Link>
           </div>
         </div>
 
-        <Card className="overflow-hidden border-amber-100 bg-[#fffaf0]">
+        <Card className="overflow-hidden border-[#dcc497] bg-[linear-gradient(145deg,#fffdfa,#f2e6d2)]">
           <CardContent className="p-6 sm:p-8">
-            <div className="rounded-2xl border border-amber-100 bg-white/75 p-5">
-              <p className="text-sm font-medium text-stone-500">今日练习建议</p>
-              <h2 className="mt-3 text-2xl font-medium tracking-normal text-stone-950">
+            <div className="rounded-[var(--radius-lg)] border border-[#e2cda5] bg-white/55 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+              <p className="text-sm font-medium text-[var(--color-text-muted)]">今日练习建议</p>
+              <h2 className="mt-3 font-[var(--font-display)] text-2xl font-medium tracking-normal text-[var(--color-text-primary)]">
                 先观察，再移动。
               </h2>
-              <p className="mt-3 text-sm leading-7 text-stone-600">
+              <p className="mt-3 text-sm leading-7 text-[var(--color-text-secondary)]">
                 选择一个最有感觉的部位，从 10 到 20 分钟的音频开始。练习结束后，用反馈表记录身体强度和感受词。
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
@@ -70,8 +70,8 @@ export default function PublicHome() {
         {principles.map((item) => (
           <Card key={item.title}>
             <CardContent className="p-5">
-              <h3 className="text-lg font-medium tracking-normal text-stone-950">{item.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-stone-600">{item.description}</p>
+              <h3 className="font-[var(--font-display)] text-xl font-medium tracking-normal text-[var(--color-text-primary)]">{item.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-[var(--color-text-secondary)]">{item.description}</p>
             </CardContent>
           </Card>
         ))}

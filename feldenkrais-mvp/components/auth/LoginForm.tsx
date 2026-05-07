@@ -10,7 +10,7 @@ const initialState: AuthFormState = {};
 type AuthIntent = 'sign-in' | 'sign-up';
 
 const inputClassName =
-  'min-h-11 w-full rounded-lg border border-stone-300 bg-white px-3.5 text-sm text-stone-950 shadow-sm transition-colors placeholder:text-stone-400 focus:border-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-200';
+  'min-h-11 w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3.5 text-sm text-[var(--color-text-primary)] shadow-[0_1px_0_rgba(61,48,35,0.04)] transition-colors placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[rgba(139,111,63,0.16)]';
 
 export default function LoginForm() {
   const [mode, setMode] = useState<AuthIntent>('sign-in');

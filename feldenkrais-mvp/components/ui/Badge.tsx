@@ -8,10 +8,10 @@ type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
 };
 
 const variantClasses: Record<BadgeVariant, string> = {
-  neutral: 'border-stone-200 bg-white text-stone-700',
-  warm: 'border-amber-200 bg-amber-50 text-amber-900',
-  success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-  muted: 'border-stone-200 bg-stone-100 text-stone-500',
+  neutral: 'border-[var(--color-border-soft)] bg-[var(--color-surface)] text-[var(--color-text-secondary)]',
+  warm: 'border-[#dcc497] bg-[var(--color-accent-light)] text-[#6f4d1f]',
+  success: 'border-[#c9d4bb] bg-[var(--color-sage-light)] text-[#566348]',
+  muted: 'border-[var(--color-border-soft)] bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]',
 };
 
 export default function Badge({
@@ -22,7 +22,7 @@ export default function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium leading-none',
+        'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium leading-none tracking-normal',
         variantClasses[variant],
         className,
       )}

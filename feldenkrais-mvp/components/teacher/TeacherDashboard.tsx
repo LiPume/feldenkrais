@@ -67,9 +67,8 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10">
       <PageHeader
-        eyebrow="管理后台"
         title="管理后台"
-        description="查看练习反馈、学生填写情况和身体部位趋势。"
+        description="查看练习反馈、身体部位热度与学生填写情况。"
         action={
           <div className="flex flex-col items-start gap-2 sm:items-end">
             <Badge variant="warm">{filterSummary}</Badge>
@@ -155,7 +154,7 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <CardTitle>学生反馈概览</CardTitle>
-            <p className="mt-2 text-sm leading-6 text-stone-600">
+            <p className="mt-2 text-sm leading-7 text-[var(--color-text-secondary)]">
               按学号排序，每页 {pageSize} 人。当前显示第 {pageStart}–{pageEnd} 位，共 {totalCount} 位。
             </p>
           </div>
@@ -174,13 +173,13 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
                 <Link
                   key={student.studentProfileId}
                   href={`/teacher/students/${student.studentProfileId}`}
-                  className="grid gap-3 px-1 py-4 transition-colors hover:bg-stone-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900 sm:grid-cols-[1fr_auto_auto] sm:items-center"
+                  className="grid gap-3 rounded-xl px-2 py-4 transition-colors hover:bg-[var(--color-bg-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] sm:grid-cols-[1fr_auto_auto] sm:items-center"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-stone-950">
+                    <p className="truncate text-sm font-medium text-[var(--color-text-primary)]">
                       {student.studentName}
                     </p>
-                    <p className="mt-1 text-xs text-stone-500">
+                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
                       {student.studentId ? `学号 ${student.studentId}` : student.studentEmail ?? '未填写学号'}
                     </p>
                   </div>
@@ -188,15 +187,15 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
                     <Badge variant={student.hasSubmitted ? 'success' : 'muted'}>
                       {student.hasSubmitted ? '已填写' : '未填写'}
                     </Badge>
-                    <span className="text-sm font-medium text-stone-900">
+                    <span className="text-sm font-medium text-[var(--color-text-primary)]">
                       {student.feedbackCount} 条反馈
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
-                    <p className="text-xs text-stone-500 sm:text-right">
+                    <p className="text-xs text-[var(--color-text-muted)] sm:text-right">
                       {student.lastFeedbackDate ? `最近 ${student.lastFeedbackDate}` : '暂无最近反馈'}
                     </p>
-                    <span className="text-sm font-medium text-stone-800">
+                    <span className="text-sm font-medium text-[var(--color-text-primary)]">
                       查看历史
                     </span>
                   </div>
@@ -206,11 +205,11 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
           )}
 
           {(page > 1 || hasMore) && (
-            <div className="mt-5 flex items-center justify-between border-t border-stone-100 pt-4">
+            <div className="mt-5 flex items-center justify-between border-t border-[var(--color-border-soft)] pt-4">
               {page > 1 ? (
                 <Link
                   href={buildPaginationUrl(baseHref, page - 1, filters)}
-                  className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-800 transition-colors hover:bg-stone-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+                  className="rounded-xl border border-[var(--color-btn-secondary-border)] bg-[var(--color-btn-secondary-bg)] px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-btn-secondary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                 >
                   上一页
                 </Link>
@@ -220,7 +219,7 @@ export default function TeacherDashboard({ teacherName, data, filters, paginatio
               {hasMore && (
                 <Link
                   href={buildPaginationUrl(baseHref, page + 1, filters)}
-                  className="rounded-lg border border-stone-950 bg-stone-950 px-4 py-2 text-sm font-medium text-stone-50 transition-colors hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+                  className="rounded-xl border border-[var(--color-btn-primary)] bg-[var(--color-btn-primary)] px-4 py-2 text-sm font-medium text-[var(--color-text-inverse)] transition-colors hover:bg-[var(--color-btn-primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                 >
                   下一页
                 </Link>

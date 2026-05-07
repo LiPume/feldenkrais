@@ -19,21 +19,21 @@ export default function PageHeader({
   return (
     <header
       className={cn(
-        'flex flex-col gap-5 border-b border-stone-200 pb-6 sm:flex-row sm:items-end sm:justify-between',
+        'flex flex-col gap-5 border-b border-[var(--color-border-soft)] pb-7 sm:flex-row sm:items-end sm:justify-between',
         className,
       )}
     >
       <div className="min-w-0">
         {eyebrow && (
-          <p className="mb-2 text-xs font-medium uppercase tracking-[0.18em] text-stone-500">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
             {eyebrow}
           </p>
         )}
-        <h1 className="text-3xl font-medium tracking-normal text-stone-950 sm:text-4xl">
+        <h1 className="font-[var(--font-display)] text-3xl font-medium tracking-normal text-[var(--color-text-primary)] sm:text-4xl">
           {title}
         </h1>
         {description && (
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--color-text-secondary)] sm:text-base">
             {description}
           </p>
         )}

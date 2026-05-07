@@ -47,7 +47,7 @@ export default function TeacherPracticeDetail({ data, filters }: Props) {
           className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-800 mb-4 transition-colors"
         >
           <span>&#8592;</span>
-          <span>返回老师端</span>
+          <span>返回总览</span>
         </Link>
 
         <div className="space-y-2">
@@ -129,8 +129,8 @@ export default function TeacherPracticeDetail({ data, filters }: Props) {
           showStudentLink
           emptyHref="/teacher"
           emptyTitle="这个练习还没有反馈记录"
-          emptyDescription="回到老师端继续查看其他练习或整体统计。"
-          emptyActionLabel="返回老师端"
+          emptyDescription="回到总览继续查看其他练习或整体统计。"
+          emptyActionLabel="返回总览"
         />
 
         {(data.recentFeedback.pageInfo.hasPreviousPage || data.recentFeedback.pageInfo.hasNextPage) && (

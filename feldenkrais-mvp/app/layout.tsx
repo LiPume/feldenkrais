@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Cormorant_Garamond, DM_Sans } from 'next/font/google';
+import { Noto_Sans_SC, Noto_Serif_SC } from 'next/font/google';
 import { UserRole } from '@prisma/client';
 import AppShell from '@/components/layout/AppShell';
 import { getUserDisplayLabel } from '@/lib/auth/role-routing';
@@ -12,20 +12,18 @@ export const metadata: Metadata = {
   description: '身体觉察记录与练习检索',
 };
 
-const fontDisplay = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  style: ['normal', 'italic'],
-  variable: '--font-cormorant',
+const fontDisplay = Noto_Serif_SC({
+  weight: ['400', '500', '600'],
+  variable: '--font-noto-serif-sc',
   display: 'swap',
+  preload: false,
 });
 
-const fontSans = DM_Sans({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  style: ['normal', 'italic'],
-  variable: '--font-dm-sans',
+const fontSans = Noto_Sans_SC({
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-noto-sans-sc',
   display: 'swap',
+  preload: false,
 });
 
 export default async function RootLayout({

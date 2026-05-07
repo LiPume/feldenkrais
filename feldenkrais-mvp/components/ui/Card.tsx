@@ -5,7 +5,7 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
-        'rounded-xl border border-stone-200 bg-white shadow-[0_1px_2px_rgba(28,25,23,0.04),0_10px_30px_rgba(28,25,23,0.05)]',
+        'rounded-[var(--radius-lg)] border border-[var(--color-border-soft)] bg-[var(--color-surface)] shadow-[var(--shadow-card)]',
         className,
       )}
       {...props}
@@ -14,13 +14,13 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 }
 
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('space-y-1.5 p-5 pb-3', className)} {...props} />;
+  return <div className={cn('space-y-2 p-5 pb-3 sm:p-6 sm:pb-4', className)} {...props} />;
 }
 
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={cn('text-lg font-medium leading-tight text-stone-950', className)}
+      className={cn('text-lg font-semibold leading-tight text-[var(--color-text-primary)]', className)}
       {...props}
     />
   );
@@ -29,20 +29,20 @@ export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingEle
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
-      className={cn('text-sm leading-6 text-stone-600', className)}
+      className={cn('text-sm leading-6 text-[var(--color-text-secondary)]', className)}
       {...props}
     />
   );
 }
 
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('p-5 pt-3', className)} {...props} />;
+  return <div className={cn('p-5 pt-3 sm:p-6 sm:pt-4', className)} {...props} />;
 }
 
 export function CardFooter({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex items-center gap-3 border-t border-stone-100 p-5', className)}
+      className={cn('flex items-center gap-3 border-t border-[var(--color-border-soft)] p-5 sm:p-6', className)}
       {...props}
     />
   );

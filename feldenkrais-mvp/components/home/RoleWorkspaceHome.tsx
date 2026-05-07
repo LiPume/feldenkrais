@@ -39,8 +39,8 @@ const studentActions: ActionCard[] = [
 
 const adminActions: ActionCard[] = [
   {
-    badge: '后台',
-    title: '进入管理后台',
+    badge: '统计',
+    title: '查看反馈总览',
     description: '查看全班反馈统计、学生填写情况和练习数据。',
     href: '/teacher',
     tone: 'primary',
@@ -58,12 +58,12 @@ function WorkspaceLinkCard({ action }: { action: ActionCard }) {
   return (
     <Link
       href={action.href}
-      className="group block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+      className="group block rounded-[var(--radius-lg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
     >
       <Card
         className={
           primary
-            ? 'h-full border-stone-900 bg-stone-950 text-stone-50 transition-transform group-hover:-translate-y-0.5'
+            ? 'h-full border-[#6d583d] bg-[#3a3027] text-[#fff8ea] transition-transform group-hover:-translate-y-0.5'
             : 'h-full transition-transform group-hover:-translate-y-0.5'
         }
       >
@@ -72,14 +72,14 @@ function WorkspaceLinkCard({ action }: { action: ActionCard }) {
             {action.badge && (
               <Badge variant={primary ? 'warm' : 'neutral'}>{action.badge}</Badge>
             )}
-            <h3 className={primary ? 'mt-4 text-xl font-medium tracking-normal text-stone-50' : 'mt-4 text-xl font-medium tracking-normal text-stone-950'}>
+            <h3 className={primary ? 'mt-4 font-[var(--font-display)] text-2xl font-medium tracking-normal text-[#fff8ea]' : 'mt-4 font-[var(--font-display)] text-2xl font-medium tracking-normal text-[var(--color-text-primary)]'}>
               {action.title}
             </h3>
-            <p className={primary ? 'mt-2 text-sm leading-6 text-stone-300' : 'mt-2 text-sm leading-6 text-stone-600'}>
+            <p className={primary ? 'mt-3 text-sm leading-7 text-[#e5d7bd]' : 'mt-3 text-sm leading-7 text-[var(--color-text-secondary)]'}>
               {action.description}
             </p>
           </div>
-          <span className={primary ? 'text-sm font-medium text-stone-100' : 'text-sm font-medium text-stone-800'}>
+          <span className={primary ? 'text-sm font-medium text-[#fff8ea]' : 'text-sm font-medium text-[var(--color-text-primary)]'}>
             进入
           </span>
         </CardContent>
@@ -94,19 +94,19 @@ export default function RoleWorkspaceHome({ role, userLabel, studentId }: Props)
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 sm:py-14">
-      <section className="rounded-3xl border border-stone-200 bg-white p-6 shadow-[0_1px_2px_rgba(28,25,23,0.04),0_18px_50px_rgba(28,25,23,0.06)] sm:p-8">
+      <section className="rounded-[var(--radius-xl)] border border-[var(--color-border-soft)] bg-[linear-gradient(145deg,var(--color-surface),#f5ecdd)] p-6 shadow-[var(--shadow-card)] sm:p-8">
         <Badge variant={isAdmin ? 'warm' : 'success'}>
-          {isAdmin ? '管理后台' : '学生工作台'}
+          {isAdmin ? '后台账号' : '学生工作台'}
         </Badge>
-        <h1 className="mt-5 text-3xl font-medium leading-tight tracking-normal text-stone-950 sm:text-4xl">
-          {isAdmin ? '欢迎回来，进入管理视图。' : `你好，${userLabel}`}
+        <h1 className="mt-5 font-[var(--font-display)] text-3xl font-medium leading-tight tracking-normal text-[var(--color-text-primary)] sm:text-4xl">
+          {isAdmin ? '欢迎回来，查看教学反馈。' : `你好，${userLabel}`}
         </h1>
         {studentId && (
-          <p className="mt-2 text-sm text-stone-500">学号 {studentId}</p>
+          <p className="mt-2 text-sm text-[var(--color-text-muted)]">学号 {studentId}</p>
         )}
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-600 sm:text-base">
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--color-text-secondary)] sm:text-base">
           {isAdmin
-            ? '从这里查看全班练习反馈和学生填写情况。前端重建不会改变后台权限和数据统计逻辑。'
+            ? '从这里查看全班练习反馈、身体部位趋势和学生填写情况。'
             : '从一次练习开始：选择身体部位，听音频，完成后记录反馈。慢一点，感受会更清楚。'}
         </p>
       </section>

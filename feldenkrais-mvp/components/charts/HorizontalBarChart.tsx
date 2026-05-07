@@ -20,19 +20,19 @@ type Props = {
 
 const toneClasses = {
   amber: {
-    accent: 'bg-amber-700',
-    soft: 'bg-amber-50',
-    text: 'text-amber-900',
+    accent: 'bg-[var(--color-chart-amber)]',
+    soft: 'bg-[var(--color-accent-light)]',
+    text: 'text-[#6f4d1f]',
   },
   stone: {
-    accent: 'bg-stone-700',
-    soft: 'bg-stone-100',
-    text: 'text-stone-900',
+    accent: 'bg-[var(--color-chart-stone)]',
+    soft: 'bg-[var(--color-surface-muted)]',
+    text: 'text-[var(--color-text-primary)]',
   },
   sage: {
-    accent: 'bg-emerald-700',
-    soft: 'bg-emerald-50',
-    text: 'text-emerald-900',
+    accent: 'bg-[var(--color-chart-sage)]',
+    soft: 'bg-[var(--color-sage-light)]',
+    text: 'text-[#566348]',
   },
 };
 
@@ -50,10 +50,10 @@ export default function HorizontalBarChart({
 
   return (
     <Card className="h-full overflow-hidden">
-      <CardHeader className="border-b border-stone-100">
+      <CardHeader className="border-b border-[var(--color-border-soft)]">
         <CardTitle>{title}</CardTitle>
         {description && (
-          <p className="text-sm leading-6 text-stone-600">{description}</p>
+          <p className="text-sm leading-7 text-[var(--color-text-secondary)]">{description}</p>
         )}
       </CardHeader>
       <CardContent className="p-5">
@@ -75,15 +75,15 @@ export default function HorizontalBarChart({
                       <span className={cn('mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium', toneClass.soft, toneClass.text)}>
                         {index + 1}
                       </span>
-                      <span className="min-w-0 truncate text-sm font-medium text-stone-800" title={item.label}>
+                      <span className="min-w-0 truncate text-sm font-medium text-[var(--color-text-primary)]" title={item.label}>
                         {item.label}
                       </span>
                     </div>
-                    <span className="shrink-0 text-sm font-semibold tabular-nums text-stone-950">
+                    <span className="shrink-0 text-sm font-semibold tabular-nums text-[var(--color-text-primary)]">
                       {item.value}
                     </span>
                   </div>
-                  <div className="h-3 overflow-hidden rounded-full bg-stone-100">
+                  <div className="h-3 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
                     <div
                       className={cn('h-full rounded-full', toneClass.accent)}
                       style={{ width, opacity: 0.52 + percent * 0.38 }}
@@ -97,7 +97,7 @@ export default function HorizontalBarChart({
                   <Link
                     key={`${item.label}-${index}`}
                     href={item.href}
-                    className="block rounded-xl p-2 transition-colors hover:bg-stone-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+                    className="block rounded-xl p-2 transition-colors hover:bg-[var(--color-bg-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
                   >
                     {row}
                   </Link>

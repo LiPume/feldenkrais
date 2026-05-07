@@ -2,44 +2,51 @@
 
 /* ─── Design Tokens ──────────────────────────────────────────────────────── */
 :root {
-  --color-bg: #faf7f2;
-  --color-surface: #ffffff;
-  --color-surface-warm: #f5ede0;
-  --color-border: #e2d6c3;
-  --color-border-strong: #c9b99a;
+  --color-bg: #f8f3ea;
+  --color-bg-soft: #fbf7ef;
+  --color-surface: #fffdfa;
+  --color-surface-warm: #f3eadc;
+  --color-surface-muted: #eee5d6;
+  --color-border: #dfd2bd;
+  --color-border-soft: #eadfce;
+  --color-border-strong: #bda987;
 
-  --color-text-primary: #1c1917;
-  --color-text-secondary: #57534e;
-  --color-text-muted: #a8a29e;
-  --color-text-inverse: #faf7f2;
+  --color-text-primary: #25201b;
+  --color-text-secondary: #62594d;
+  --color-text-muted: #8d8274;
+  --color-text-inverse: #fffaf1;
 
-  --color-accent: #6b5e3e;
-  --color-accent-light: #f0e8d8;
-  --color-accent-hover: #4a3f2b;
+  --color-accent: #8b6f3f;
+  --color-accent-light: #efe2ca;
+  --color-accent-hover: #61492b;
+  --color-sage: #6f7c62;
+  --color-sage-light: #e7eddf;
+  --color-clay: #9a6049;
+  --color-clay-light: #f1dfd6;
 
-  --color-btn-primary: #1c1917;
-  --color-btn-primary-hover: #3c3530;
-  --color-btn-secondary-bg: #faf7f2;
-  --color-btn-secondary-border: #c9b99a;
-  --color-btn-secondary-hover: #f0e8d8;
+  --color-btn-primary: #332920;
+  --color-btn-primary-hover: #4d3b2d;
+  --color-btn-secondary-bg: #fffdfa;
+  --color-btn-secondary-border: #d2c1a6;
+  --color-btn-secondary-hover: #f3eadc;
 
-  --color-admin-bg: #111110;
-  --color-admin-surface: #1c1c1b;
-  --color-admin-border: #2e2e2d;
-  --color-admin-accent: #c9a96e;
-  --color-admin-accent-light: #2a2520;
+  --color-chart-amber: #a8752a;
+  --color-chart-sage: #71805f;
+  --color-chart-clay: #9a6049;
+  --color-chart-stone: #786d61;
+  --color-chart-olive: #8a8354;
 
-  --font-display: var(--font-cormorant), Georgia, 'Times New Roman', serif;
-  --font-body: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-noto-serif-sc), 'Noto Serif SC', 'Songti SC', 'Source Han Serif SC', serif;
+  --font-body: var(--font-noto-sans-sc), 'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 
-  --radius-sm: 0.625rem;
+  --radius-sm: 0.75rem;
   --radius-md: 1rem;
-  --radius-lg: 1.5rem;
-  --radius-xl: 2rem;
+  --radius-lg: 1.375rem;
+  --radius-xl: 1.875rem;
 
-  --shadow-card: 0 1px 3px rgba(28, 25, 23, 0.06), 0 4px 16px rgba(28, 25, 23, 0.05);
-  --shadow-card-hover: 0 4px 12px rgba(28, 25, 23, 0.10), 0 8px 32px rgba(28, 25, 23, 0.08);
-  --shadow-soft: 0 2px 8px rgba(28, 25, 23, 0.07);
+  --shadow-card: 0 1px 2px rgba(61, 48, 35, 0.05), 0 14px 36px rgba(61, 48, 35, 0.06);
+  --shadow-card-hover: 0 6px 18px rgba(61, 48, 35, 0.10), 0 18px 44px rgba(61, 48, 35, 0.08);
+  --shadow-soft: 0 8px 28px rgba(61, 48, 35, 0.07);
 }
 
 /* ─── Base ───────────────────────────────────────────────────────────────── */
@@ -55,17 +62,19 @@ html {
 
 body {
   font-family: var(--font-body);
-  background-color: var(--color-bg);
+  background:
+    radial-gradient(circle at top left, rgba(239, 226, 202, 0.55), transparent 30rem),
+    linear-gradient(180deg, var(--color-bg-soft) 0%, var(--color-bg) 45%, #f5eee3 100%);
   color: var(--color-text-primary);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 /* ─── Typography ──────────────────────────────────────────────────────────── */
 h1, h2, h3 {
   font-family: var(--font-display);
-  line-height: 1.15;
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  line-height: 1.18;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 h4, h5, h6 {
@@ -102,8 +111,8 @@ h4, h5, h6 {
 /* ─── Focus ───────────────────────────────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline-offset: 3px;
+  border-radius: 8px;
 }
 
 /* ─── Animations ──────────────────────────────────────────────────────────── */

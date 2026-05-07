@@ -22,7 +22,7 @@ export default function FormField({
     <div className={cn('space-y-2', className)}>
       {label && (
         <label
-          className="block text-sm font-medium text-stone-800"
+          className="block text-sm font-medium text-[var(--color-text-primary)]"
           htmlFor={htmlFor}
         >
           {label}
@@ -30,10 +30,10 @@ export default function FormField({
       )}
       {children}
       {description && !error && (
-        <p className="text-xs leading-5 text-stone-500">{description}</p>
+        <p className="text-xs leading-5 text-[var(--color-text-muted)]">{description}</p>
       )}
       {error && (
-        <p className="text-xs leading-5 text-red-700">{error}</p>
+        <p className="text-xs leading-5 text-[#793f32]">{error}</p>
       )}
     </div>
   );

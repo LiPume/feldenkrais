@@ -73,7 +73,7 @@ export default function Error({
               textDecoration: 'none',
             }}
           >
-            返回老师端
+            返回总览
           </a>
         </div>
       </div>

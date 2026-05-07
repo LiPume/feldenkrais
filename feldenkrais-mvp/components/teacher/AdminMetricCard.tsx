@@ -8,10 +8,10 @@ type Props = {
 };
 
 const toneClasses = {
-  neutral: 'border-stone-200 bg-white',
-  warm: 'border-amber-200 bg-amber-50/70',
-  success: 'border-emerald-200 bg-emerald-50/70',
-  muted: 'border-stone-200 bg-stone-50',
+  neutral: 'border-[var(--color-border-soft)] bg-[var(--color-surface)]',
+  warm: 'border-[#dcc497] bg-[linear-gradient(145deg,#fffdfa,#f1e3c8)]',
+  success: 'border-[#c9d4bb] bg-[linear-gradient(145deg,#fffdfa,#e7eddf)]',
+  muted: 'border-[var(--color-border-soft)] bg-[var(--color-surface-muted)]',
 };
 
 export default function AdminMetricCard({
@@ -23,12 +23,12 @@ export default function AdminMetricCard({
   return (
     <Card className={toneClasses[tone]}>
       <CardContent className="p-5">
-        <p className="text-sm font-medium text-stone-500">{label}</p>
-        <p className="mt-3 text-4xl font-medium tracking-normal text-stone-950">
+        <p className="text-sm font-medium text-[var(--color-text-muted)]">{label}</p>
+        <p className="mt-3 text-4xl font-semibold tracking-normal text-[var(--color-text-primary)] tabular-nums">
           {value}
         </p>
         {description && (
-          <p className="mt-2 text-xs leading-5 text-stone-500">{description}</p>
+          <p className="mt-2 text-xs leading-5 text-[var(--color-text-muted)]">{description}</p>
         )}
       </CardContent>
     </Card>

@@ -16,14 +16,14 @@ type Props = {
 };
 
 const segmentColors = [
-  '#a16207',
-  '#78716c',
-  '#92400e',
-  '#57534e',
-  '#b45309',
-  '#6b7280',
-  '#854d0e',
-  '#a8a29e',
+  '#a8752a',
+  '#71805f',
+  '#9a6049',
+  '#786d61',
+  '#8a8354',
+  '#b88745',
+  '#6f6657',
+  '#b99670',
 ];
 
 export default function DonutDistributionChart({
@@ -57,10 +57,10 @@ export default function DonutDistributionChart({
 
   return (
     <Card className="h-full overflow-hidden">
-      <CardHeader className="border-b border-stone-100">
+      <CardHeader className="border-b border-[var(--color-border-soft)]">
         <CardTitle>{title}</CardTitle>
         {description && (
-          <p className="text-sm leading-6 text-stone-600">{description}</p>
+          <p className="text-sm leading-7 text-[var(--color-text-secondary)]">{description}</p>
         )}
       </CardHeader>
       <CardContent className="p-5">
@@ -79,7 +79,7 @@ export default function DonutDistributionChart({
                   cy="60"
                   r={radius}
                   fill="none"
-                  stroke="#f5f5f4"
+                  stroke="#eee5d6"
                   strokeWidth="16"
                 />
                 {segments.map((segment, index) => {
@@ -100,8 +100,8 @@ export default function DonutDistributionChart({
                 })}
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-medium tabular-nums text-stone-950">{total}</span>
-                <span className="text-xs text-stone-500">标签选择</span>
+                <span className="text-3xl font-semibold tabular-nums text-[var(--color-text-primary)]">{total}</span>
+                <span className="text-xs text-[var(--color-text-muted)]">标签选择</span>
               </div>
             </div>
 
@@ -109,13 +109,13 @@ export default function DonutDistributionChart({
               {visibleItems.map((item, index) => {
                 const percent = Math.round((item.value / total) * 100);
                 return (
-                  <div key={`${item.label}-${index}`} className="flex items-center justify-between gap-3 rounded-lg bg-stone-50 px-3 py-2">
+                  <div key={`${item.label}-${index}`} className="flex items-center justify-between gap-3 rounded-xl bg-[var(--color-bg-soft)] px-3 py-2">
                     <div className="flex min-w-0 items-center gap-2">
                       <span
                         className="size-2.5 shrink-0 rounded-full"
                         style={{ backgroundColor: segmentColors[index % segmentColors.length] }}
                       />
-                      <span className="truncate text-sm font-medium text-stone-700" title={item.label}>
+                      <span className="truncate text-sm font-medium text-[var(--color-text-secondary)]" title={item.label}>
                         {item.label}
                       </span>
                     </div>

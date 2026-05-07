@@ -30,7 +30,7 @@ export default async function TeacherStudentHistoryPage({ params }: Props) {
         className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-800 mb-6 transition-colors"
       >
         <span>&#8592;</span>
-        <span>返回老师端</span>
+        <span>返回总览</span>
       </Link>
 
       <div className="mb-6">
@@ -47,8 +47,8 @@ export default async function TeacherStudentHistoryPage({ params }: Props) {
         sessions={data.sessions}
         emptyHref="/teacher"
         emptyTitle="这个学生还没有反馈记录"
-        emptyDescription="回到老师端继续查看其他学生或整体统计。"
-        emptyActionLabel="返回老师端"
+        emptyDescription="回到总览继续查看其他学生或整体统计。"
+        emptyActionLabel="返回总览"
       />
     </div>
   );

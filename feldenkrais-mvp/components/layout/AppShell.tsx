@@ -31,7 +31,7 @@ function getShellNavItems(role: AppShellRole): AppNavItem[] {
 }
 
 function getRoleLabel(role: AppShellRole): string {
-  if (role === 'admin') return '管理后台';
+  if (role === 'admin') return '教学观察与反馈统计';
   if (role === 'student') return '学生';
   return '身体觉察 · 练习与反馈';
 }
@@ -40,17 +40,17 @@ export default function AppShell({ children, role, userLabel }: AppShellProps) {
   const navItems = getShellNavItems(role);
 
   return (
-    <div className="min-h-dvh bg-[var(--color-bg)] text-stone-950">
-      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-[rgba(250,247,242,0.92)] backdrop-blur">
+    <div className="min-h-dvh text-[var(--color-text-primary)]">
+      <header className="sticky top-0 z-30 border-b border-[var(--color-border-soft)] bg-[rgba(251,247,239,0.88)] backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-4 px-4 sm:px-6">
           <div className="min-w-0 flex-1">
             <Link
               href="/"
-              className="block w-fit text-lg font-medium tracking-normal text-stone-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-stone-900"
+              className="block w-fit font-[var(--font-display)] text-xl font-medium tracking-normal text-[var(--color-text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent)]"
             >
               费登奎斯
             </Link>
-            <p className="mt-0.5 truncate text-xs text-stone-500">{getRoleLabel(role)}</p>
+            <p className="mt-0.5 truncate text-xs text-[var(--color-text-muted)]">{getRoleLabel(role)}</p>
           </div>
 
           <AppNav items={navItems} />
@@ -58,7 +58,7 @@ export default function AppShell({ children, role, userLabel }: AppShellProps) {
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             {userLabel ? (
               <div className="flex items-center gap-3">
-                <span className="hidden max-w-32 truncate text-sm text-stone-600 sm:inline">
+                <span className="hidden max-w-32 truncate text-sm text-[var(--color-text-secondary)] sm:inline">
                   {userLabel}
                 </span>
                 <SignOutButton />
@@ -66,7 +66,7 @@ export default function AppShell({ children, role, userLabel }: AppShellProps) {
             ) : (
               <Link
                 href="/login"
-                className="inline-flex min-h-9 items-center justify-center rounded-lg border border-stone-950 bg-stone-950 px-3 text-sm font-medium text-stone-50 transition-colors hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900"
+                className="inline-flex min-h-9 items-center justify-center rounded-xl border border-[var(--color-btn-primary)] bg-[var(--color-btn-primary)] px-3 text-sm font-medium text-[var(--color-text-inverse)] transition-colors hover:bg-[var(--color-btn-primary-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
               >
                 登录
               </Link>
@@ -77,9 +77,9 @@ export default function AppShell({ children, role, userLabel }: AppShellProps) {
 
       <main>{children}</main>
 
-      <footer className="border-t border-stone-200/80">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-1 px-4 py-8 text-sm text-stone-500 sm:px-6">
-          <p className="font-medium text-stone-700">费登奎斯身体觉察</p>
+      <footer className="border-t border-[var(--color-border-soft)]">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-1 px-4 py-8 text-sm text-[var(--color-text-muted)] sm:px-6">
+          <p className="font-medium text-[var(--color-text-secondary)]">费登奎斯身体觉察</p>
           <p>&copy; {new Date().getFullYear()} · 感知身体，觉察当下</p>
         </div>
       </footer>

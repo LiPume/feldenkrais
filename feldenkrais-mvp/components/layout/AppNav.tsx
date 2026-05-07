@@ -38,10 +38,10 @@ export default function AppNav({ items }: AppNavProps) {
               href={item.href}
               className={cn(
                 'rounded-full px-3.5 py-2 text-sm font-medium transition-colors',
-                'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900',
+                'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
                 active
-                  ? 'bg-stone-950 text-stone-50'
-                  : 'text-stone-600 hover:bg-stone-100 hover:text-stone-950',
+                  ? 'bg-[var(--color-btn-primary)] text-[var(--color-text-inverse)]'
+                  : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-accent-light)] hover:text-[var(--color-text-primary)]',
               )}
             >
               {item.label}
@@ -53,8 +53,8 @@ export default function AppNav({ items }: AppNavProps) {
       <button
         type="button"
         className={cn(
-          'inline-flex size-10 items-center justify-center rounded-lg border border-stone-200 bg-white text-stone-700 shadow-sm md:hidden',
-          'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900',
+          'inline-flex size-10 items-center justify-center rounded-xl border border-[var(--color-border-soft)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] shadow-sm md:hidden',
+          'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
         )}
         aria-label={isOpen ? '关闭导航' : '打开导航'}
         aria-expanded={isOpen}
@@ -72,7 +72,7 @@ export default function AppNav({ items }: AppNavProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-12 z-40 w-56 rounded-xl border border-stone-200 bg-white p-2 shadow-xl md:hidden">
+        <div className="absolute right-0 top-12 z-40 w-56 rounded-2xl border border-[var(--color-border-soft)] bg-[var(--color-surface)] p-2 shadow-[var(--shadow-soft)] md:hidden">
           <nav aria-label="移动端主导航" className="flex flex-col">
             {items.map((item) => {
               const active = pathname === item.href;
@@ -82,11 +82,11 @@ export default function AppNav({ items }: AppNavProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-900',
+                    'rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]',
                     active
-                      ? 'bg-stone-950 text-stone-50'
-                      : 'text-stone-700 hover:bg-stone-100 hover:text-stone-950',
+                      ? 'bg-[var(--color-btn-primary)] text-[var(--color-text-inverse)]'
+                      : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-accent-light)] hover:text-[var(--color-text-primary)]',
                   )}
                   onClick={() => setIsOpen(false)}
                 >
