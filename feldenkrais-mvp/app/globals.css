@@ -157,6 +157,10 @@ h4, h5, h6 {
 }
 
 /* Stagger delays for child elements */
+.stagger-children > * {
+  animation: none;
+}
+
 .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
 .stagger-children > *:nth-child(2) { animation-delay: 80ms; }
 .stagger-children > *:nth-child(3) { animation-delay: 160ms; }
@@ -507,11 +511,8 @@ h4, h5, h6 {
 }
 
 .mobile-nav-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(28, 25, 23, 0.4);
-  z-index: 150;
-  animation: fadeIn 0.2s ease-out;
+  display: none;
+  pointer-events: none;
 }
 
 .mobile-nav-panel {
@@ -732,7 +733,7 @@ h4, h5, h6 {
 
 .highlight-card {
   padding: 1.75rem;
-  opacity: 0;
+  opacity: 1;
 }
 
 .highlight-icon {
@@ -939,7 +940,7 @@ h4, h5, h6 {
 }
 
 .workspace-section {
-  opacity: 0;
+  opacity: 1;
 }
 
 .workspace-section-header {
@@ -971,7 +972,7 @@ h4, h5, h6 {
   display: block;
   text-decoration: none;
   padding: 1.5rem;
-  opacity: 0;
+  opacity: 1;
 }
 
 .action-card--primary {
@@ -1356,7 +1357,7 @@ h4, h5, h6 {
 
 .search-header {
   margin-bottom: 2rem;
-  opacity: 0;
+  opacity: 1;
 }
 
 .search-title {
@@ -1384,12 +1385,12 @@ h4, h5, h6 {
   padding: 1.5rem;
   position: sticky;
   top: 5rem;
-  opacity: 0;
+  opacity: 1;
 }
 
 .search-results-panel {
   min-height: 300px;
-  opacity: 0;
+  opacity: 1;
 }
 
 .search-results-header {
@@ -1476,7 +1477,7 @@ h4, h5, h6 {
   box-shadow: var(--shadow-card);
   text-decoration: none;
   transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-  opacity: 0;
+  opacity: 1;
 }
 
 .practice-card:hover {
@@ -1558,7 +1559,7 @@ h4, h5, h6 {
   justify-content: space-between;
   gap: 1.5rem;
   margin-bottom: 2rem;
-  opacity: 0;
+  opacity: 1;
 }
 
 .page-title {
@@ -1588,7 +1589,7 @@ h4, h5, h6 {
 }
 
 .session-list .card {
-  opacity: 0;
+  opacity: 1;
 }
 
 .session-list-empty {
@@ -1597,7 +1598,7 @@ h4, h5, h6 {
   align-items: center;
   text-align: center;
   padding: 4rem 2rem;
-  opacity: 0;
+  opacity: 1;
 }
 
 .session-list-empty-icon {
@@ -1911,7 +1912,7 @@ a.session-card-student:hover {
 
 .feedback-form-header {
   margin-bottom: 2rem;
-  opacity: 0;
+  opacity: 1;
 }
 
 .feedback-back-link {
@@ -1968,7 +1969,7 @@ a.session-card-student:hover {
   grid-template-columns: 380px 1fr;
   gap: 1.5rem;
   align-items: start;
-  opacity: 0;
+  opacity: 1;
 }
 
 .feedback-map-panel {
